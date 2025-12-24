@@ -53,6 +53,17 @@ class ExpansionField(FlowField):
         if self.normalize:
             y = _normalize_vector(y)
         return y
+    
+class NoiseField(FlowField):
+    def __init__(self, normalize: bool = True):
+        super().__init__()
+        self.normalize = normalize
+
+    def __call__(self, x: np.ndarray) -> np.ndarray:
+        noise = np.random.uniform(low=-1.0, high=1.0, size=x.shape)
+        if self.normalize:
+            noise = _normalize_vector(noise)
+        return noise
 
 class FieldSum(FlowField):
 
