@@ -1,11 +1,7 @@
 import numpy as np
 from tstudio.scalar_fields import ScalarField
+from tstudio.utils import normalize_vector
 
-def _normalize_vector(v: np.ndarray) -> np.ndarray:
-    norm = np.linalg.norm(v)
-    if norm == 0:
-        return v
-    return v / norm
 
 class FlowField():
     def __init__(self):
@@ -36,7 +32,7 @@ class RotationField(FlowField):
         y = np.array([-r[1], r[0]])
         y = y * self.direction
         if self.normalize:
-            y = _normalize_vector(y)
+            y = normalize_vector(y)
         return y
 
 
@@ -51,7 +47,7 @@ class ExpansionField(FlowField):
         y = x - self.center
         y = y * self.direction
         if self.normalize:
-            y = _normalize_vector(y)
+            y = normalize_vector(y)
         return y
     
 class NoiseField(FlowField):
@@ -62,7 +58,7 @@ class NoiseField(FlowField):
     def __call__(self, x: np.ndarray) -> np.ndarray:
         noise = np.random.uniform(low=-1.0, high=1.0, size=x.shape)
         if self.normalize:
-            noise = _normalize_vector(noise)
+            noise = normalize_vector(noise)
         return noise
 
 class FieldSum(FlowField):
@@ -95,6 +91,6 @@ class FieldSum(FlowField):
 
             y += y_
         if self.normalize:
-            y = _normalize_vector(y)
+            y = normalize_vector(y)
     
         return y
