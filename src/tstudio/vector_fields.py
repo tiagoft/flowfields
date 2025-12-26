@@ -34,7 +34,7 @@ class RotationField(FlowField):
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
         r = x - self.center
-        y = np.array([-r[1], r[0]])
+        y = np.array([-r[1], r[0]], dtype=float)
         y = y * self.direction
         if self.normalize:
             y = normalize_vector(y)
@@ -101,12 +101,13 @@ class FieldSum(FlowField):
         """
         y = np.zeros_like(x, dtype=float)
         for idx, field in enumerate(self.list_of_fields):
-            y_ = field(x)
+            y_ = field(x) * 1.0
             if self.weights is not None:
                 if isinstance(self.weights[idx], ScalarField):
                     weight_value = self.weights[idx](x)
                 else:
                     weight_value = self.weights[idx]
+                #print(weight_value, y_, y_.dtype)
                 y_ *= weight_value
 
             y += y_
@@ -161,27 +162,58 @@ class FieldSelect(FlowField):
         self,
         fields: list[FlowField],
         weights: None | list[float] | list[ScalarField] = None,
+        select_n: int = 1,
         change_id_prob: float = 0.1,
+        temperature: float = 0.0,
         normalize: bool = True,
+        lerp_len: int = 0,
     ):
         self.list_of_fields = fields
         self.weights = weights
         self.change_id_prob = change_id_prob
         self.normalize = normalize
-        self.last_idx = None
+        self.select_n = select_n
+        self.temperature = temperature
+        self.lerp_len = lerp_len
+        self.lerp_count = 0
 
-    def select_index(self, x: np.ndarray):
+        self.last_idx = self.select_index().tolist()
+        fields = [self.list_of_fields[i] for i in self.last_idx]
+        weights = [self.weights[i] for i in self.last_idx]
+        self.current_field = FieldSum(
+            fields=fields,
+            weights=weights,
+        )
+        self.next_field = self.current_field
+
+    def select_index(self, x: np.ndarray | None = None) -> list[int]:
         magnitudes = []
-        for idx, field in enumerate(self.list_of_fields):
+
+        for idx, _ in enumerate(self.list_of_fields):
 
             if self.weights is not None:
-                if isinstance(self.weights[idx], ScalarField):
-                    weight_value = self.weights[idx](x)
-                else:
-                    weight_value = self.weights[idx]
-                magnitudes.append(weight_value)
+                if x is not None:
+                    if isinstance(self.weights[idx], ScalarField):
+                        weight_value = self.weights[idx](x)
+                    else:
+                        weight_value = self.weights[idx]
 
-        idx = np.random.choice(len(self.list_of_fields), p=np.array(magnitudes)/np.sum(magnitudes))
+                    magnitudes.append(weight_value)
+                else:
+                    magnitudes.append(1.0)
+
+        p = np.array(magnitudes) / np.sum(magnitudes)
+        # Apply temperature to p, where higher temperature makes distribution more uniform
+        if self.temperature > 0:
+            p = p**(1.0 / (1.0 + self.temperature))
+            p = p / np.sum(p)
+
+        idx = np.random.choice(
+            len(self.list_of_fields),
+            p=p,
+            size=self.select_n,
+            replace=False,
+        )
         return idx
 
     def __call__(
@@ -191,10 +223,32 @@ class FieldSelect(FlowField):
         """
         Returns the flowfield vector at point x.
         """
-        if self.last_idx is None or np.random.rand() < self.change_id_prob:
-            self.last_idx = self.select_index(x)
+        if (self.last_idx is None\
+                or np.random.rand() < self.change_id_prob)\
+                and self.lerp_count == 0:
+            self.last_idx = self.select_index(x).tolist()
+            fields = [self.list_of_fields[i] for i in self.last_idx]
+            weights = [self.weights[i] for i in self.last_idx]
+            self.next_field = FieldSum(
+                fields=fields,
+                weights=weights,
+            )
+            self.lerp_count = 0
 
-        y = self.list_of_fields[self.last_idx](x)
+        #print("Using fields:", self.last_idx)
+        y_curr = self.current_field(x)
+        if self.current_field != self.next_field:
+            if self.lerp_count < self.lerp_len:
+                t = self.lerp_count / self.lerp_len
+                y_next = self.next_field(x)
+                y = (1 - t) * y_curr + t * y_next
+                self.lerp_count += 1
+            else:
+                self.current_field = self.next_field
+                self.lerp_count = 0
+                y = y_curr
+        else:
+            y = y_curr
 
         if self.normalize:
             y = normalize_vector(y)
