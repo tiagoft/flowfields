@@ -4,7 +4,11 @@ from tstudio.utils import normalize_vector
 
 
 class FlowField():
-    def __init__(self):
+
+    def __init__(
+        self,
+        **kwargs,
+    ):
         pass
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
@@ -21,6 +25,7 @@ class RotationField(FlowField):
         center: np.ndarray,
         direction: int = 1,
         normalize: bool = True,
+        **kwargs,
     ):
         super().__init__()
         self.center = center
@@ -37,7 +42,14 @@ class RotationField(FlowField):
 
 
 class ExpansionField(FlowField):
-    def __init__(self, center: np.ndarray, direction: int = 1, normalize: bool = True):
+
+    def __init__(
+        self,
+        center: np.ndarray,
+        direction: int = 1,
+        normalize: bool = True,
+        **kwargs,
+    ):
         super().__init__()
         self.center = center
         self.direction = direction
@@ -49,9 +61,15 @@ class ExpansionField(FlowField):
         if self.normalize:
             y = normalize_vector(y)
         return y
-    
+
+
 class NoiseField(FlowField):
-    def __init__(self, normalize: bool = True):
+
+    def __init__(
+        self,
+        normalize: bool = True,
+        **kwargs,
+    ):
         super().__init__()
         self.normalize = normalize
 
@@ -61,13 +79,15 @@ class NoiseField(FlowField):
             noise = normalize_vector(noise)
         return noise
 
+
 class FieldSum(FlowField):
 
-    def __init__(self,
-                 fields: list[FlowField],
-                 weights: None | list[float] | list[ScalarField] = None,
-                 normalize: bool = True,
-                 ):
+    def __init__(
+        self,
+        fields: list[FlowField],
+        weights: None | list[float] | list[ScalarField] = None,
+        normalize: bool = True,
+    ):
         self.list_of_fields = fields
         self.weights = weights
         self.normalize = normalize
@@ -79,7 +99,7 @@ class FieldSum(FlowField):
         """
         Returns the flowfield vector at point x.
         """
-        y = np.zeros_like(x)
+        y = np.zeros_like(x, dtype=float)
         for idx, field in enumerate(self.list_of_fields):
             y_ = field(x)
             if self.weights is not None:
@@ -92,17 +112,18 @@ class FieldSum(FlowField):
             y += y_
         if self.normalize:
             y = normalize_vector(y)
-    
+
         return y
 
 
 class FieldMax(FlowField):
 
-    def __init__(self,
-                 fields: list[FlowField],
-                 weights: None | list[float] | list[ScalarField] = None,
-                 normalize: bool = True,
-                 ):
+    def __init__(
+        self,
+        fields: list[FlowField],
+        weights: None | list[float] | list[ScalarField] = None,
+        normalize: bool = True,
+    ):
         self.list_of_fields = fields
         self.weights = weights
         self.normalize = normalize
@@ -115,7 +136,7 @@ class FieldMax(FlowField):
         Returns the flowfield vector at point x.
         """
         magnitudes = []
-        
+
         for idx, field in enumerate(self.list_of_fields):
 
             if self.weights is not None:
@@ -124,11 +145,58 @@ class FieldMax(FlowField):
                 else:
                     weight_value = self.weights[idx]
                 magnitudes.append(weight_value)
-        
+
         idx = np.argmax(magnitudes)
         y = self.list_of_fields[idx](x)
 
         if self.normalize:
             y = normalize_vector(y)
-    
+
+        return y
+
+
+class FieldSelect(FlowField):
+
+    def __init__(
+        self,
+        fields: list[FlowField],
+        weights: None | list[float] | list[ScalarField] = None,
+        change_id_prob: float = 0.1,
+        normalize: bool = True,
+    ):
+        self.list_of_fields = fields
+        self.weights = weights
+        self.change_id_prob = change_id_prob
+        self.normalize = normalize
+        self.last_idx = None
+
+    def select_index(self, x: np.ndarray):
+        magnitudes = []
+        for idx, field in enumerate(self.list_of_fields):
+
+            if self.weights is not None:
+                if isinstance(self.weights[idx], ScalarField):
+                    weight_value = self.weights[idx](x)
+                else:
+                    weight_value = self.weights[idx]
+                magnitudes.append(weight_value)
+
+        idx = np.random.choice(len(self.list_of_fields), p=np.array(magnitudes)/np.sum(magnitudes))
+        return idx
+
+    def __call__(
+        self,
+        x: np.ndarray,
+    ) -> np.ndarray:
+        """
+        Returns the flowfield vector at point x.
+        """
+        if self.last_idx is None or np.random.rand() < self.change_id_prob:
+            self.last_idx = self.select_index(x)
+
+        y = self.list_of_fields[self.last_idx](x)
+
+        if self.normalize:
+            y = normalize_vector(y)
+
         return y
