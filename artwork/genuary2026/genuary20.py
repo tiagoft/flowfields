@@ -10,14 +10,10 @@ from itertools import product
 
 
 def run():
-    np.random.seed(45)
+    np.random.seed(42)
     
-    fibonacci_sequence = [5, 8, 13]
-    radius_delta = 1.5
-    radius = 0
-    
-    fibonacci_sequence = [2, 3, 5, 8, 13]
-    radius_delta = 0.75
+    fibonacci_sequence = [3, 5, 8, 13]
+    radius_delta = 0.9
     radius = 0
     
     fields = []
@@ -53,6 +49,9 @@ def run():
         fields=fields,
         weights=weights,
         change_id_prob=0.01,
+        select_n=3,
+        temperature=1.5,
+        lerp_len = 30,
     )
 
     c1 = tstudio.scalar_fields.GaussianField(np.array([0.7, 1.1]), sigma=2)
