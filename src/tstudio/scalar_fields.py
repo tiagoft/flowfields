@@ -1,5 +1,17 @@
 import numpy as np
 
+_SCALAR_REGISTRY: dict[str, type] = {}
+
+
+def _register_scalar(cls):
+    _SCALAR_REGISTRY[cls.__name__] = cls
+    return cls
+
+
+def scalar_from_dict(d: dict) -> "ScalarField":
+    """Reconstruct a ScalarField from its dict representation."""
+    return _SCALAR_REGISTRY[d["type"]].from_dict(d)
+
 
 class ScalarField():
     """
@@ -19,7 +31,15 @@ class ScalarField():
         """
         raise NotImplementedError("Subclasses should implement this method.")
 
+    def to_dict(self) -> dict:
+        raise NotImplementedError("Subclasses should implement this method.")
 
+    @classmethod
+    def from_dict(cls, d: dict) -> "ScalarField":
+        raise NotImplementedError("Subclasses should implement this method.")
+
+
+@_register_scalar
 class GaussianField(ScalarField):
     """
     Isotropic Gaussian (radial basis) scalar field.
@@ -50,7 +70,24 @@ class GaussianField(ScalarField):
         return self.scale * np.exp(-np.sum(
             (x - self.center)**2) / (2 * self.sigma**2))
 
+    def to_dict(self) -> dict:
+        return {
+            "type": "GaussianField",
+            "center": self.center.tolist(),
+            "sigma": float(self.sigma),
+            "scale": float(self.scale),
+        }
 
+    @classmethod
+    def from_dict(cls, d: dict) -> "GaussianField":
+        return cls(
+            center=np.array(d["center"]),
+            sigma=d.get("sigma", 1.0),
+            scale=d.get("scale", 1.0),
+        )
+
+
+@_register_scalar
 class ConstantField(ScalarField):
     """
     Uniform scalar field that returns the same value everywhere.
@@ -70,7 +107,18 @@ class ConstantField(ScalarField):
     def __call__(self, x: np.ndarray) -> float:
         return self.value
 
+    def to_dict(self) -> dict:
+        return {
+            "type": "ConstantField",
+            "value": float(self.value),
+        }
 
+    @classmethod
+    def from_dict(cls, d: dict) -> "ConstantField":
+        return cls(value=d.get("value", 1.0))
+
+
+@_register_scalar
 class BoxField(ScalarField):
     """
     Axis-aligned rectangular indicator field.
@@ -111,3 +159,21 @@ class BoxField(ScalarField):
             return self.inside_value
         else:
             return self.outside_value
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "BoxField",
+            "min_corner": self.min_corner.tolist(),
+            "max_corner": self.max_corner.tolist(),
+            "inside_value": float(self.inside_value),
+            "outside_value": float(self.outside_value),
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "BoxField":
+        return cls(
+            min_corner=np.array(d["min_corner"]),
+            max_corner=np.array(d["max_corner"]),
+            inside_value=d.get("inside_value", 1.0),
+            outside_value=d.get("outside_value", 0.0),
+        )

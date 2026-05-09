@@ -1,6 +1,34 @@
 import numpy as np
-from tstudio.scalar_fields import ScalarField
+from tstudio.scalar_fields import ScalarField, scalar_from_dict
 from tstudio.utils import normalize_vector
+
+_FIELD_REGISTRY: dict[str, type] = {}
+
+
+def _register_field(cls):
+    _FIELD_REGISTRY[cls.__name__] = cls
+    return cls
+
+
+def field_from_dict(d: dict) -> "FlowField":
+    """Reconstruct a FlowField from its dict representation."""
+    return _FIELD_REGISTRY[d["type"]].from_dict(d)
+
+
+def _serialize_weight(w) -> float | dict | None:
+    if w is None:
+        return None
+    if isinstance(w, ScalarField):
+        return w.to_dict()
+    return float(w)
+
+
+def _deserialize_weight(w) -> float | ScalarField | None:
+    if w is None:
+        return None
+    if isinstance(w, dict):
+        return scalar_from_dict(w)
+    return float(w)
 
 
 class FlowField():
@@ -24,7 +52,15 @@ class FlowField():
         """
         raise NotImplementedError("Subclasses should implement this method.")
 
+    def to_dict(self) -> dict:
+        raise NotImplementedError("Subclasses should implement this method.")
 
+    @classmethod
+    def from_dict(cls, d: dict) -> "FlowField":
+        raise NotImplementedError("Subclasses should implement this method.")
+
+
+@_register_field
 class RotationField(FlowField):
     """
     Curl / rotation field centred at a fixed point.
@@ -62,7 +98,24 @@ class RotationField(FlowField):
             y = normalize_vector(y)
         return y
 
+    def to_dict(self) -> dict:
+        return {
+            "type": "RotationField",
+            "center": self.center.tolist(),
+            "direction": int(self.direction),
+            "normalize": bool(self.normalize),
+        }
 
+    @classmethod
+    def from_dict(cls, d: dict) -> "RotationField":
+        return cls(
+            center=np.array(d["center"]),
+            direction=d.get("direction", 1),
+            normalize=d.get("normalize", True),
+        )
+
+
+@_register_field
 class ExpansionField(FlowField):
     """
     Radial expansion / contraction field centred at a fixed point.
@@ -97,7 +150,24 @@ class ExpansionField(FlowField):
             y = normalize_vector(y)
         return y
 
+    def to_dict(self) -> dict:
+        return {
+            "type": "ExpansionField",
+            "center": self.center.tolist(),
+            "direction": int(self.direction),
+            "normalize": bool(self.normalize),
+        }
 
+    @classmethod
+    def from_dict(cls, d: dict) -> "ExpansionField":
+        return cls(
+            center=np.array(d["center"]),
+            direction=d.get("direction", 1),
+            normalize=d.get("normalize", True),
+        )
+
+
+@_register_field
 class NoiseField(FlowField):
     """
     Spatially-uncorrelated uniform random vector field.
@@ -127,7 +197,18 @@ class NoiseField(FlowField):
             noise = normalize_vector(noise)
         return noise
 
+    def to_dict(self) -> dict:
+        return {
+            "type": "NoiseField",
+            "normalize": bool(self.normalize),
+        }
 
+    @classmethod
+    def from_dict(cls, d: dict) -> "NoiseField":
+        return cls(normalize=d.get("normalize", True))
+
+
+@_register_field
 class FieldSum(FlowField):
     """
     Weighted linear combination of multiple flow fields.
@@ -172,7 +253,6 @@ class FieldSum(FlowField):
                     weight_value = self.weights[idx](x)
                 else:
                     weight_value = self.weights[idx]
-                #print(weight_value, y_, y_.dtype)
                 y_ *= weight_value
 
             y += y_
@@ -181,7 +261,25 @@ class FieldSum(FlowField):
 
         return y
 
+    def to_dict(self) -> dict:
+        return {
+            "type": "FieldSum",
+            "normalize": bool(self.normalize),
+            "fields": [f.to_dict() for f in self.list_of_fields],
+            "weights": [_serialize_weight(w) for w in self.weights] if self.weights is not None else None,
+        }
 
+    @classmethod
+    def from_dict(cls, d: dict) -> "FieldSum":
+        weights_raw = d.get("weights")
+        return cls(
+            fields=[field_from_dict(f) for f in d["fields"]],
+            weights=[_deserialize_weight(w) for w in weights_raw] if weights_raw is not None else None,
+            normalize=d.get("normalize", True),
+        )
+
+
+@_register_field
 class FieldMax(FlowField):
     """
     Hard-selection field that returns the vector of the highest-weighted field.
@@ -235,7 +333,25 @@ class FieldMax(FlowField):
 
         return y
 
+    def to_dict(self) -> dict:
+        return {
+            "type": "FieldMax",
+            "normalize": bool(self.normalize),
+            "fields": [f.to_dict() for f in self.list_of_fields],
+            "weights": [_serialize_weight(w) for w in self.weights] if self.weights is not None else None,
+        }
 
+    @classmethod
+    def from_dict(cls, d: dict) -> "FieldMax":
+        weights_raw = d.get("weights")
+        return cls(
+            fields=[field_from_dict(f) for f in d["fields"]],
+            weights=[_deserialize_weight(w) for w in weights_raw] if weights_raw is not None else None,
+            normalize=d.get("normalize", True),
+        )
+
+
+@_register_field
 class FieldSelect(FlowField):
     """
     Stateful probabilistic field selector with optional smooth transitions.
@@ -354,7 +470,6 @@ class FieldSelect(FlowField):
             )
             self.lerp_count = 0
 
-        #print("Using fields:", self.last_idx)
         y_curr = self.current_field(x)
         if self.current_field != self.next_field:
             if self.lerp_count < self.lerp_len:
@@ -373,3 +488,28 @@ class FieldSelect(FlowField):
             y = normalize_vector(y)
 
         return y
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "FieldSelect",
+            "normalize": bool(self.normalize),
+            "select_n": int(self.select_n),
+            "change_id_prob": float(self.change_id_prob),
+            "temperature": float(self.temperature),
+            "lerp_len": int(self.lerp_len),
+            "fields": [f.to_dict() for f in self.list_of_fields],
+            "weights": [_serialize_weight(w) for w in self.weights] if self.weights is not None else None,
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "FieldSelect":
+        weights_raw = d.get("weights")
+        return cls(
+            fields=[field_from_dict(f) for f in d["fields"]],
+            weights=[_deserialize_weight(w) for w in weights_raw] if weights_raw is not None else None,
+            select_n=d.get("select_n", 1),
+            change_id_prob=d.get("change_id_prob", 0.1),
+            temperature=d.get("temperature", 0.0),
+            normalize=d.get("normalize", True),
+            lerp_len=d.get("lerp_len", 0),
+        )
