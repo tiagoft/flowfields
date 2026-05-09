@@ -4,6 +4,13 @@ from tstudio.utils import normalize_vector
 
 
 class FlowField():
+    """
+    Abstract base class for 2D vector fields.
+
+    Subclasses implement ``__call__`` to return a flow vector v(x) at any
+    point x in the plane.  The optional ``normalize`` flag (supported by most
+    subclasses) divides the result by its L2 norm so that ||v(x)|| = 1.
+    """
 
     def __init__(
         self,
@@ -19,6 +26,21 @@ class FlowField():
 
 
 class RotationField(FlowField):
+    """
+    Curl / rotation field centred at a fixed point.
+
+    At each point x the vector is the radius vector rotated 90° in the plane:
+
+        r = x - center
+        v(x) = direction * [-r_y, r_x]
+
+    This produces circular streamlines around ``center``.
+    ``direction = +1`` gives counter-clockwise rotation;
+    ``direction = -1`` gives clockwise rotation.
+
+    If ``normalize=True`` (default) the output is divided by its L2 norm,
+    giving unit-speed circular flow regardless of distance from the centre.
+    """
 
     def __init__(
         self,
@@ -42,6 +64,19 @@ class RotationField(FlowField):
 
 
 class ExpansionField(FlowField):
+    """
+    Radial expansion / contraction field centred at a fixed point.
+
+    At each point x the vector points directly away from (or toward) the centre:
+
+        v(x) = direction * (x - center)
+
+    ``direction = +1`` produces an outward (source / expansion) field;
+    ``direction = -1`` produces an inward (sink / contraction) field.
+
+    If ``normalize=True`` (default) the output is divided by its L2 norm,
+    giving a pure radial direction independent of distance from the centre.
+    """
 
     def __init__(
         self,
@@ -64,6 +99,19 @@ class ExpansionField(FlowField):
 
 
 class NoiseField(FlowField):
+    """
+    Spatially-uncorrelated uniform random vector field.
+
+    Each call samples a fresh vector independently of position:
+
+        v ~ Uniform(-1, 1)^n
+
+    where n is the dimensionality of the input x.  Because each evaluation is
+    independent, this field is non-deterministic and has no spatial coherence.
+
+    If ``normalize=True`` (default) the random vector is divided by its L2
+    norm, producing a uniformly-distributed random unit direction.
+    """
 
     def __init__(
         self,
@@ -81,6 +129,23 @@ class NoiseField(FlowField):
 
 
 class FieldSum(FlowField):
+    """
+    Weighted linear combination of multiple flow fields.
+
+    At each point x the output is the sum of all constituent field vectors,
+    each scaled by its corresponding weight:
+
+        v(x) = sum_i  w_i(x) * F_i(x)
+
+    Weights ``w_i`` can be:
+    - ``None``        — all fields contribute equally (weight 1).
+    - ``float``       — a fixed scalar multiplier.
+    - ``ScalarField`` — a position-dependent multiplier evaluated at x,
+                        allowing spatially-varying blending.
+
+    If ``normalize=True`` (default) the summed vector is divided by its L2
+    norm so that ||v(x)|| = 1.
+    """
 
     def __init__(
         self,
@@ -118,6 +183,21 @@ class FieldSum(FlowField):
 
 
 class FieldMax(FlowField):
+    """
+    Hard-selection field that returns the vector of the highest-weighted field.
+
+    At each point x the weights are evaluated and the winning field is chosen:
+
+        i* = argmax_i  w_i(x)
+        v(x) = F_{i*}(x)
+
+    Weights can be fixed scalars or ``ScalarField`` instances evaluated at x,
+    so the dominant field can change continuously across space.  This produces
+    sharp, discontinuous transitions at boundaries where two weights are equal.
+
+    If ``normalize=True`` (default) the selected vector is divided by its L2
+    norm.
+    """
 
     def __init__(
         self,
@@ -157,6 +237,45 @@ class FieldMax(FlowField):
 
 
 class FieldSelect(FlowField):
+    """
+    Stateful probabilistic field selector with optional smooth transitions.
+
+    At each call this field may stochastically switch to a new active sub-field
+    (or blend of sub-fields).  The selection is governed by a softmax-like
+    distribution over the weights:
+
+        p_i(x) ∝ w_i(x)^(1 / (1 + T))
+
+    where T = ``temperature``.  T = 0 keeps the raw weight ratios; larger T
+    flattens the distribution toward uniform, making all fields equally likely.
+
+    ``select_n`` fields are drawn without replacement from this distribution and
+    combined via ``FieldSum`` to form the active field.
+
+    **Switching**: with probability ``change_id_prob`` at each call a new set of
+    ``select_n`` fields is sampled (using weights evaluated at the current x).
+
+    **Interpolation**: when ``lerp_len > 0`` a transition between the outgoing
+    and incoming active field is linearly interpolated over ``lerp_len`` calls:
+
+        v(x) = (1 - t) * v_current(x) + t * v_next(x),   t = step / lerp_len
+
+    After ``lerp_len`` steps the new field becomes the current field.
+
+    If ``normalize=True`` (default) the final vector is divided by its L2 norm.
+
+    Args:
+        fields: List of candidate ``FlowField`` instances.
+        weights: Per-field scalar or ``ScalarField`` weights used as selection
+            probabilities.  Must be provided (not None) for probabilistic use.
+        select_n: Number of fields to blend at each active selection.
+        change_id_prob: Probability of resampling the active field on each call.
+        temperature: Controls distribution flatness; 0 = proportional to weight,
+            higher values = more uniform.
+        normalize: Whether to L2-normalise the output vector.
+        lerp_len: Number of steps over which to interpolate between field
+            transitions.  0 = instantaneous switch.
+    """
 
     def __init__(
         self,
