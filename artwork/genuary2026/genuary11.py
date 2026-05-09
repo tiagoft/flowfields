@@ -12,6 +12,7 @@ from itertools import product
 def run():
     with open(__file__, "r") as f:
         contents = f.read()
+    contents = "all work and no fun makes jack a dull boy " * 100
 
     contents = ' '.join(contents.split())
 
@@ -107,7 +108,7 @@ def run():
         ctx.stroke()
 
     # fname = source code filename without extension
-    fname = __file__.split('/')[-1].split('.')[0] + '.png'
+    fname = __file__.split('/')[-1].split('.')[0] + 'b.png'
     surface.write_to_png(fname)
 
 

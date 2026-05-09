@@ -10,6 +10,12 @@ from itertools import product
 
 number_per_level = [3, 5, 8, 13]
 
+def _in_range(center, radius, point):
+    return np.linalg.norm(point - center) <= radius
+
+def _in_range_list(centers, radius, point):
+    return [_in_range(center, radius, point) for center in centers]
+
 def run():
     
     level = 1
@@ -64,6 +70,13 @@ def run():
     rotation_angle = 0
     quantization_levels = 3
     quantization_radius = 2.0
+    centers = [
+        np.array([0,0]),
+        np.array([2,2]),
+        np.array([-2,2]),
+        np.array([2,-2]),
+        np.array([-2,-2]),
+    ]
 
     surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width_px, height_px)
     ctx = cairo.Context(surface)
@@ -95,11 +108,16 @@ def run():
             if rotation_angle != 0:
                 dx = tstudio.utils.rotate_vector(dx, rotation_angle)
             if quantization_levels is not None:
-                if quantization_radius is not None:
-                    if np.linalg.norm(x) < quantization_radius:
-                        dx = tstudio.utils.quantize_vector(dx, quantization_levels)
-                else:
+                locus = _in_range_list(centers, quantization_radius, x)
+                if locus[0] and not (locus[1] or locus[2] or locus[3] or locus[4]):
                     dx = tstudio.utils.quantize_vector(dx, quantization_levels)
+                elif locus[1] or locus[0] and not (locus[2] or locus[3] or locus[4]):
+                    dx = tstudio.utils.quantize_vector(dx, quantization_levels+1)
+                elif locus[2] or locus[3]:
+                    dx = tstudio.utils.quantize_vector(dx, quantization_levels+2)
+                elif locus[4]:
+                    dx = tstudio.utils.quantize_vector(dx, quantization_levels+3)
+                
     
             x_ = x + dx
             ctx.line_to(x_[0], x_[1])
