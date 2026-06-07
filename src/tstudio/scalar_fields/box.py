@@ -1,0 +1,64 @@
+import numpy as np
+
+from tstudio.scalar_fields.base import ScalarField, _register_scalar
+
+
+@_register_scalar
+class BoxField(ScalarField):
+    """
+    Axis-aligned rectangular indicator field.
+
+    Returns one of two constant values depending on whether x lies inside the
+    box defined by ``min_corner`` and ``max_corner``:
+
+        f(x) = inside_value   if  min_corner <= x <= max_corner  (element-wise)
+               outside_value  otherwise
+
+    The corners are automatically sorted at construction time, so passing them
+    in either order is safe.  Useful for hard spatial masking or gating.
+
+    Args:
+        min_corner:    Lower-left corner of the box.
+        max_corner:    Upper-right corner of the box.
+        inside_value:  Value returned for points strictly inside the box
+                       (default 1.0).
+        outside_value: Value returned for points outside the box (default 0.0).
+    """
+
+    def __init__(
+        self,
+        min_corner: np.ndarray,
+        max_corner: np.ndarray,
+        inside_value: float = 1.0,
+        outside_value: float = 0.0,
+    ):
+        min_corner_ = np.minimum(min_corner, max_corner)
+        max_corner_ = np.maximum(min_corner, max_corner)
+        self.min_corner = min_corner_
+        self.max_corner = max_corner_
+        self.inside_value = inside_value
+        self.outside_value = outside_value
+
+    def __call__(self, x: np.ndarray) -> float:
+        if np.all(x >= self.min_corner) and np.all(x <= self.max_corner):
+            return self.inside_value
+        else:
+            return self.outside_value
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "BoxField",
+            "min_corner": self.min_corner.tolist(),
+            "max_corner": self.max_corner.tolist(),
+            "inside_value": float(self.inside_value),
+            "outside_value": float(self.outside_value),
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "BoxField":
+        return cls(
+            min_corner=np.array(d["min_corner"]),
+            max_corner=np.array(d["max_corner"]),
+            inside_value=d.get("inside_value", 1.0),
+            outside_value=d.get("outside_value", 0.0),
+        )
