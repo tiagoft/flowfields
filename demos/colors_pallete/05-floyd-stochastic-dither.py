@@ -11,7 +11,7 @@ from pathlib import Path
 from sklearn.cluster import KMeans
 
 
-def stochastic_floyd_steinberg(matrix_data, centers, sigma=0.5):
+def stochastic_floyd_steinberg(matrix_data, centers, sigma=0.2):
     img = matrix_data.copy().astype(float)
     h, w, n = *img.shape[:2], centers.shape[0]
     assert(sigma > 0)
