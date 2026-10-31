@@ -75,8 +75,10 @@ class MatrixColorField(ColorField):
         z = count
         z = z.clip(min=1)
         z = z / z.sum()  # Normalize to get probabilities
-        probs = np.exp(z / self.temperature)
-        probs /= probs.sum()  # Normalize to get probabilities 
+        logits = z / self.temperature
+        logits -= logits.max()  # Keeps np.exp from overflowing at low temperatures
+        probs = np.exp(logits)
+        probs /= probs.sum()  # Normalize to get probabilities
         
         # if probs contain NaN, print z and probs
         if np.isnan(probs).any():
