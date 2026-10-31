@@ -1,3 +1,5 @@
+"""Scalar field with the same value everywhere."""
+
 import numpy as np
 
 from tstudio.scalar_fields.base import ScalarField
@@ -20,4 +22,7 @@ class ConstantField(ScalarField):
         self.value = value
 
     def __call__(self, x: np.ndarray) -> float:
+        """
+        Returns the scalar field value at point x.
+        """
         return self.value

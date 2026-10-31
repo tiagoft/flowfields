@@ -1,4 +1,9 @@
+"""Placeholder entry point for the package."""
+
 def main():
+    """
+    Prints a greeting.
+    """
     print("Hello from tstudio!")
 
 

@@ -1,3 +1,5 @@
+"""Vector field that circles around a center."""
+
 import numpy as np
 
 from tstudio.utils import normalize_vector
@@ -19,6 +21,13 @@ class RotationField(FlowField):
 
     If ``normalize=True`` (default) the output is divided by its L2 norm,
     giving unit-speed circular flow regardless of distance from the centre.
+    Otherwise the vector length equals the distance from the centre.
+
+    Args:
+        center: Point the flow rotates around.
+        direction: +1 for counter-clockwise, -1 for clockwise.
+        normalize: Whether to L2-normalise the output vector.
+        **kwargs: Ignored.
     """
 
     def __init__(
@@ -34,6 +43,9 @@ class RotationField(FlowField):
         self.normalize = normalize
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
+        """
+        Returns the flowfield vector at point x.
+        """
         r = x - self.center
         y = np.array([-r[1], r[0]], dtype=float)
         y = y * self.direction

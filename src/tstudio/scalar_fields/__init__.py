@@ -1,3 +1,5 @@
+"""Scalar fields: functions that give a number for each point in the plane."""
+
 from tstudio.scalar_fields.base import ScalarField
 from tstudio.scalar_fields.gaussian import GaussianField
 from tstudio.scalar_fields.constant import ConstantField

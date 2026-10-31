@@ -1,3 +1,5 @@
+"""Scalar field with the shape of a Gaussian bump."""
+
 import numpy as np
 
 from tstudio.scalar_fields.base import ScalarField
@@ -30,5 +32,8 @@ class GaussianField(ScalarField):
         self.scale = scale
 
     def __call__(self, x: np.ndarray) -> float:
+        """
+        Returns the scalar field value at point x.
+        """
         return self.scale * np.exp(-np.sum(
             (x - self.center)**2) / (2 * self.sigma**2))

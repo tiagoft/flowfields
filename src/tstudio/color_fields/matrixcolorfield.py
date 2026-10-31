@@ -1,3 +1,5 @@
+"""Color field that draws colors from the local palette of an image."""
+
 from tstudio.color_fields.base import ColorField
 import numpy as np
 from sklearn.cluster import KMeans
@@ -6,6 +8,29 @@ from sklearn.cluster import KMeans
 class MatrixColorField(ColorField):
     """
     A color field that is defined by a matrix of colors.
+
+    The colors of the matrix are reduced to a palette of ``n_colors`` with
+    k-means.  At each point x, a palette color is drawn according to how many
+    pixels of that color there are in a square window around x:
+
+        p_k(x) ∝ exp( z_k(x) / temperature )
+
+    where z_k(x) is the fraction of the window's pixels in color k.  Unlike
+    ``MatrixField``, y grows from the top of the image: the first row of the
+    matrix is at the lowest y.
+
+    Args:
+        min_corner: Point that maps to the first row and column of the matrix.
+        max_corner: Point that maps to the last row and column of the matrix.
+        data: Array of RGB colors with shape (H, W, 3).
+        n_colors: Size of the palette.
+        random_state: Seed for k-means.  It does not affect the color draws,
+            which use the global NumPy random state.
+        kernel_size: Side of the window, as a fraction of the largest side of
+            the matrix.
+        temperature: Lower values favour the most common color in the window,
+            and higher values approach a uniform draw from the whole palette,
+            including colors that are absent from the window.
     """
 
     def __init__(
@@ -45,7 +70,11 @@ class MatrixColorField(ColorField):
             self.integral_images[k, 1:, 1:] = mask.cumsum(axis=0).cumsum(axis=1)
 
     def get_probs(self, x: np.ndarray) -> np.ndarray:
+        """
+        Returns the probability of each palette color at point x.
 
+        Points outside the bounding box use the nearest point inside it.
+        """
         # Get the normalized coordinates of x in the range [0, 1]
         t = (x - self.min_corner) / (self.max_corner - self.min_corner)
         t = np.clip(t, 0.0, 1.0)
@@ -92,6 +121,11 @@ class MatrixColorField(ColorField):
     
             
     def __call__(self, x: np.ndarray, random_state: int = 0) -> np.ndarray:
+        """
+        Draws a palette color for point x and returns it as an RGB array.
+
+        The ``random_state`` argument is not used.
+        """
         probs = self.get_probs(x)
         sample = np.random.choice(list(range(self.n_colors)), p=probs.flatten())
         return self.kmeans.cluster_centers_[sample]

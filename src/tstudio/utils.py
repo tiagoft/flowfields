@@ -1,3 +1,5 @@
+"""Helpers for opening images and for working with 2D vectors."""
+
 import numpy as np
 from PIL import Image
 
@@ -127,11 +129,14 @@ def rotate_vector(v: np.ndarray, angle: float) -> np.ndarray:
 
 
 def quantize_vector(v: np.ndarray, n_levels: int) -> np.ndarray:
-    """Quantize a vector to a given number of levels
+    """Round the angle of a 2D vector to one of n_levels directions
+
+    The directions are evenly spaced, starting at angle 0.  The length of the
+    vector does not change.
 
     Args:
         v (np.ndarray): Input vector
-        n_levels (int): Number of quantization levels
+        n_levels (int): Number of allowed directions
 
     Returns:
         np.ndarray: Quantized vector

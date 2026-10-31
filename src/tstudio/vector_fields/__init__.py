@@ -1,3 +1,5 @@
+"""Vector fields: functions that give a vector for each point in the plane."""
+
 from tstudio.vector_fields.base import FlowField
 from tstudio.vector_fields.rotation import RotationField
 from tstudio.vector_fields.expansion import ExpansionField

@@ -1,3 +1,5 @@
+"""Vector field that switches randomly between its fields as it is called."""
+
 import numpy as np
 
 from tstudio.scalar_fields import ScalarField
@@ -38,11 +40,14 @@ class FieldSelect(FlowField):
         fields: List of candidate ``FlowField`` instances.
         weights: Per-field scalar or ``ScalarField`` weights used as selection
             probabilities.  ``None`` makes all fields equally likely.
-        select_n: Number of fields to blend at each active selection.
+        select_n: Number of fields to blend at each active selection.  Fewer
+            are used if fewer fields have a non-zero weight at that point.
         change_id_prob: Probability of resampling the active field on each call.
         temperature: Controls distribution flatness; 0 = proportional to weight,
             higher values = more uniform.
-        normalize: Whether to L2-normalise the output vector.
+        normalize: Whether to L2-normalise the output vector.  The active
+            fields are always normalised, so ``False`` only keeps the length
+            of vectors interpolated during a transition.
         lerp_len: Number of steps over which to interpolate between field
             transitions.  0 = instantaneous switch.
     """
@@ -75,7 +80,18 @@ class FieldSelect(FlowField):
         )
         self.next_field = self.current_field
 
-    def select_index(self, x: np.ndarray | None = None) -> list[int]:
+    def select_index(self, x: np.ndarray | None = None) -> np.ndarray:
+        """
+        Draws the indices of the fields to activate.
+
+        Args:
+            x: Point where the weights are evaluated.  If None, or if the field
+                has no weights, all fields are equally likely.  The same happens
+                if every weight is zero at x.
+
+        Returns:
+            Array with the drawn indices, without repetition.
+        """
         magnitudes = []
 
         for idx, _ in enumerate(self.list_of_fields):

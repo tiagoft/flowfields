@@ -1,3 +1,5 @@
+"""Vector field that points away from or toward a center."""
+
 import numpy as np
 
 from tstudio.utils import normalize_vector
@@ -17,6 +19,13 @@ class ExpansionField(FlowField):
 
     If ``normalize=True`` (default) the output is divided by its L2 norm,
     giving a pure radial direction independent of distance from the centre.
+    Otherwise the vector length equals the distance from the centre.
+
+    Args:
+        center: Point the flow moves away from or toward.
+        direction: +1 for outward, -1 for inward.
+        normalize: Whether to L2-normalise the output vector.
+        **kwargs: Ignored.
     """
 
     def __init__(
@@ -32,6 +41,9 @@ class ExpansionField(FlowField):
         self.normalize = normalize
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
+        """
+        Returns the flowfield vector at point x.
+        """
         y = x - self.center
         y = y * self.direction
         if self.normalize:

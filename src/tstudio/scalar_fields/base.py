@@ -1,3 +1,5 @@
+"""Abstract base class for scalar fields."""
+
 import numpy as np
 
 class ScalarField():

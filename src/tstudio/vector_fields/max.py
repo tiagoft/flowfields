@@ -1,3 +1,5 @@
+"""Vector field that uses only the highest-weighted of its fields at each point."""
+
 import numpy as np
 
 from tstudio.scalar_fields import ScalarField
@@ -21,6 +23,12 @@ class FieldMax(FlowField):
 
     If ``normalize=True`` (default) the selected vector is divided by its L2
     norm.
+
+    Args:
+        fields: The candidate ``FlowField`` instances.
+        weights: One weight per field.  ``None`` gives all fields the same
+            weight.
+        normalize: Whether to L2-normalise the output vector.
     """
 
     def __init__(

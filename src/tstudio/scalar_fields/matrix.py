@@ -1,3 +1,5 @@
+"""Scalar fields that read their values from a 2D array, such as an image."""
+
 import numpy as np
 
 from tstudio.scalar_fields.base import ScalarField
@@ -10,7 +12,14 @@ class MatrixField(ScalarField):
     This field is defined by a 2D array of scalar values, and a spatial
     bounding box that maps the array indices to a region in space. The field
     value at any point is obtained by bilinear interpolation of the
-    array values.
+    array values.  The first row of the array is at the top of the box (the
+    highest y), as in an image, and the field is 0 outside the box.
+
+    Args:
+        min_corner: One corner of the bounding box.
+        max_corner: The opposite corner of the bounding box.
+        data: 2D array of values.
+        normalize: Whether to rescale ``data`` to the range [0, 1].
     """
 
     def __init__(
@@ -32,6 +41,9 @@ class MatrixField(ScalarField):
                 self.data = self.data / np.max(self.data)
 
     def __call__(self, x: np.ndarray) -> float:
+        """
+        Returns the scalar field value at point x.
+        """
         if np.all(x >= self.min_corner) and np.all(x <= self.max_corner):
             # Perform bilinear interpolation
             t = (x - self.min_corner) / (self.max_corner - self.min_corner)
@@ -66,6 +78,17 @@ class MatrixField(ScalarField):
         vmin=0,
         vmax=1,
     ):
+        """
+        Saves an image of the matrix with a colorbar.
+
+        Args:
+            output_filename: Path of the file to write.
+            figsize: Figure size in inches.
+            dpi: Figure resolution.
+            cmap: Matplotlib colormap name.
+            vmin: Value at the bottom of the colormap.
+            vmax: Value at the top of the colormap.
+        """
         import matplotlib.pyplot as plt
 
         plt.figure(figsize=figsize)
@@ -79,9 +102,19 @@ class MatrixField(ScalarField):
 
 class KernelProbabilisticMatrixField(MatrixField):
     """
-    A matrix field that applies a Gaussian kernel to the input coordinates
-    before performing bilinear interpolation. This allows for a smoother
-    transition between values in the matrix.
+    A ``MatrixField`` multiplied by a Gaussian centred on its bounding box:
+
+        f(x) = exp( -||x - c||^2 / (2 * sigma^2) ) * m(x)
+
+    where c is the centre of the box and m(x) is the ``MatrixField`` value, so
+    the values fade toward the borders of the box.
+
+    Args:
+        min_corner: One corner of the bounding box.
+        max_corner: The opposite corner of the bounding box.
+        data: 2D array of values.
+        normalize: Whether to rescale ``data`` to the range [0, 1].
+        sigma: Spread of the Gaussian, in the same units as x.
     """
 
     def __init__(
@@ -90,10 +123,7 @@ class KernelProbabilisticMatrixField(MatrixField):
         max_corner: np.ndarray,
         data: np.ndarray,
         normalize: bool = False,
-        sigma: float = 1.0, # The standard deviation of the Gaussian kernel
-                            # The scale here is relative to the size of the bounding box, so a value of 1.0 means that the kernel
-                            # will have a standard deviation equal to the 
-                            # size of the bounding box.
+        sigma: float = 1.0,
     ):
         super().__init__(
             min_corner,
@@ -104,6 +134,9 @@ class KernelProbabilisticMatrixField(MatrixField):
         self.sigma = sigma
 
     def __call__(self, x: np.ndarray) -> float:
+        """
+        Returns the scalar field value at point x.
+        """
         if np.all(x >= self.min_corner) and np.all(x <= self.max_corner):
             # Apply Gaussian kernel
             center = (self.min_corner + self.max_corner) / 2

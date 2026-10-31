@@ -1,3 +1,5 @@
+"""Scalar field with one value inside a rectangle and another outside of it."""
+
 import numpy as np
 
 from tstudio.scalar_fields.base import ScalarField
@@ -19,8 +21,8 @@ class BoxField(ScalarField):
     Args:
         min_corner:    Lower-left corner of the box.
         max_corner:    Upper-right corner of the box.
-        inside_value:  Value returned for points strictly inside the box
-                       (default 1.0).
+        inside_value:  Value returned for points inside the box, borders
+                       included (default 1.0).
         outside_value: Value returned for points outside the box (default 0.0).
     """
 
@@ -39,6 +41,9 @@ class BoxField(ScalarField):
         self.outside_value = outside_value
 
     def __call__(self, x: np.ndarray) -> float:
+        """
+        Returns the scalar field value at point x.
+        """
         if np.all(x >= self.min_corner) and np.all(x <= self.max_corner):
             return self.inside_value
         else:

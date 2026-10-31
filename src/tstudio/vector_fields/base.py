@@ -1,3 +1,5 @@
+"""Abstract base class for vector fields."""
+
 import numpy as np
 
 class FlowField():

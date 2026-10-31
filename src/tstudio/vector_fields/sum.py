@@ -1,3 +1,5 @@
+"""Vector field that adds its fields with weights."""
+
 import numpy as np
 
 from tstudio.scalar_fields import ScalarField
@@ -14,14 +16,18 @@ class FieldSum(FlowField):
 
         v(x) = sum_i  w_i(x) * F_i(x)
 
-    Weights ``w_i`` can be:
-    - ``None``        — all fields contribute equally (weight 1).
+    Each weight ``w_i`` can be:
     - ``float``       — a fixed scalar multiplier.
     - ``ScalarField`` — a position-dependent multiplier evaluated at x,
                         allowing spatially-varying blending.
 
     If ``normalize=True`` (default) the summed vector is divided by its L2
     norm so that ||v(x)|| = 1.
+
+    Args:
+        fields: The ``FlowField`` instances to add.
+        weights: One weight per field.  ``None`` gives all fields weight 1.
+        normalize: Whether to L2-normalise the output vector.
     """
 
     def __init__(
