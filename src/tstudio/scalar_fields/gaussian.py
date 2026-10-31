@@ -1,9 +1,8 @@
 import numpy as np
 
-from tstudio.scalar_fields.base import ScalarField, _register_scalar
+from tstudio.scalar_fields.base import ScalarField
 
 
-@_register_scalar
 class GaussianField(ScalarField):
     """
     Isotropic Gaussian (radial basis) scalar field.
@@ -33,19 +32,3 @@ class GaussianField(ScalarField):
     def __call__(self, x: np.ndarray) -> float:
         return self.scale * np.exp(-np.sum(
             (x - self.center)**2) / (2 * self.sigma**2))
-
-    def to_dict(self) -> dict:
-        return {
-            "type": "GaussianField",
-            "center": self.center.tolist(),
-            "sigma": float(self.sigma),
-            "scale": float(self.scale),
-        }
-
-    @classmethod
-    def from_dict(cls, d: dict) -> "GaussianField":
-        return cls(
-            center=np.array(d["center"]),
-            sigma=d.get("sigma", 1.0),
-            scale=d.get("scale", 1.0),
-        )

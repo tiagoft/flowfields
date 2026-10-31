@@ -1,10 +1,9 @@
 import numpy as np
 
 from tstudio.utils import normalize_vector
-from tstudio.vector_fields.base import FlowField, _register_field
+from tstudio.vector_fields.base import FlowField
 
 
-@_register_field
 class RotationField(FlowField):
     """
     Curl / rotation field centred at a fixed point.
@@ -41,19 +40,3 @@ class RotationField(FlowField):
         if self.normalize:
             y = normalize_vector(y)
         return y
-
-    def to_dict(self) -> dict:
-        return {
-            "type": "RotationField",
-            "center": self.center.tolist(),
-            "direction": int(self.direction),
-            "normalize": bool(self.normalize),
-        }
-
-    @classmethod
-    def from_dict(cls, d: dict) -> "RotationField":
-        return cls(
-            center=np.array(d["center"]),
-            direction=d.get("direction", 1),
-            normalize=d.get("normalize", True),
-        )

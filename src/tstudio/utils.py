@@ -1,5 +1,4 @@
 import numpy as np
-import yaml
 
 
 def normalize_vector(v: np.ndarray) -> np.ndarray:
@@ -125,37 +124,3 @@ def quantize_vector(v: np.ndarray, n_levels: int) -> np.ndarray:
     quantized_angle = round(angle /
                             (2 * np.pi) * n_levels) * (2 * np.pi / n_levels)
     return polar_to_cartesian(radius, quantized_angle)
-
-
-def save_field_yaml(field, path: str) -> None:
-    """Serialize a FlowField tree to a YAML file."""
-    with open(path, "w") as f:
-        yaml.dump(field.to_dict(),
-                  f,
-                  default_flow_style=False,
-                  sort_keys=False,
-                  allow_unicode=True)
-
-
-def load_field_yaml(path: str):
-    """Load a FlowField tree from a YAML file."""
-    from tstudio.vector_fields import field_from_dict
-    with open(path) as f:
-        return field_from_dict(yaml.safe_load(f))
-
-
-def save_scalar_yaml(field, path: str) -> None:
-    """Serialize a ScalarField to a YAML file."""
-    with open(path, "w") as f:
-        yaml.dump(field.to_dict(),
-                  f,
-                  default_flow_style=False,
-                  sort_keys=False,
-                  allow_unicode=True)
-
-
-def load_scalar_yaml(path: str):
-    """Load a ScalarField from a YAML file."""
-    from tstudio.scalar_fields import scalar_from_dict
-    with open(path) as f:
-        return scalar_from_dict(yaml.safe_load(f))

@@ -2,16 +2,9 @@ import numpy as np
 
 from tstudio.scalar_fields import ScalarField
 from tstudio.utils import normalize_vector
-from tstudio.vector_fields.base import (
-    FlowField,
-    _deserialize_weight,
-    _register_field,
-    _serialize_weight,
-    field_from_dict,
-)
+from tstudio.vector_fields.base import FlowField
 
 
-@_register_field
 class FieldMax(FlowField):
     """
     Hard-selection field that returns the vector of the highest-weighted field.
@@ -64,20 +57,3 @@ class FieldMax(FlowField):
             y = normalize_vector(y)
 
         return y
-
-    def to_dict(self) -> dict:
-        return {
-            "type": "FieldMax",
-            "normalize": bool(self.normalize),
-            "fields": [f.to_dict() for f in self.list_of_fields],
-            "weights": [_serialize_weight(w) for w in self.weights] if self.weights is not None else None,
-        }
-
-    @classmethod
-    def from_dict(cls, d: dict) -> "FieldMax":
-        weights_raw = d.get("weights")
-        return cls(
-            fields=[field_from_dict(f) for f in d["fields"]],
-            weights=[_deserialize_weight(w) for w in weights_raw] if weights_raw is not None else None,
-            normalize=d.get("normalize", True),
-        )

@@ -1,10 +1,9 @@
 import numpy as np
 
 from tstudio.utils import normalize_vector
-from tstudio.vector_fields.base import FlowField, _register_field
+from tstudio.vector_fields.base import FlowField
 
 
-@_register_field
 class NoiseField(FlowField):
     """
     Spatially-uncorrelated uniform random vector field.
@@ -33,13 +32,3 @@ class NoiseField(FlowField):
         if self.normalize:
             noise = normalize_vector(noise)
         return noise
-
-    def to_dict(self) -> dict:
-        return {
-            "type": "NoiseField",
-            "normalize": bool(self.normalize),
-        }
-
-    @classmethod
-    def from_dict(cls, d: dict) -> "NoiseField":
-        return cls(normalize=d.get("normalize", True))

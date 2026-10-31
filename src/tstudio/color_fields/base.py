@@ -9,12 +9,3 @@ class ColorField():
     def __call__(self, x: np.ndarray) -> float:
         raise NotImplementedError("ColorField is an abstract class and cannot be called directly.")
     
-    def to_dict(self) -> dict:
-        return {
-            "type": "ColorField",
-        }
-
-    @classmethod
-    def from_dict(cls, d: dict) -> "ColorField":
-        return cls()
-    

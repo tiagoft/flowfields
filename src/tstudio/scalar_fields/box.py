@@ -1,9 +1,8 @@
 import numpy as np
 
-from tstudio.scalar_fields.base import ScalarField, _register_scalar
+from tstudio.scalar_fields.base import ScalarField
 
 
-@_register_scalar
 class BoxField(ScalarField):
     """
     Axis-aligned rectangular indicator field.
@@ -44,21 +43,3 @@ class BoxField(ScalarField):
             return self.inside_value
         else:
             return self.outside_value
-
-    def to_dict(self) -> dict:
-        return {
-            "type": "BoxField",
-            "min_corner": self.min_corner.tolist(),
-            "max_corner": self.max_corner.tolist(),
-            "inside_value": float(self.inside_value),
-            "outside_value": float(self.outside_value),
-        }
-
-    @classmethod
-    def from_dict(cls, d: dict) -> "BoxField":
-        return cls(
-            min_corner=np.array(d["min_corner"]),
-            max_corner=np.array(d["max_corner"]),
-            inside_value=d.get("inside_value", 1.0),
-            outside_value=d.get("outside_value", 0.0),
-        )

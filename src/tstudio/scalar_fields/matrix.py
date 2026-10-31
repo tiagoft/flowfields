@@ -1,9 +1,8 @@
 import numpy as np
 
-from tstudio.scalar_fields.base import ScalarField, _register_scalar
+from tstudio.scalar_fields.base import ScalarField
 
 
-@_register_scalar
 class MatrixField(ScalarField):
     """
     Matrix-based scalar field.
@@ -58,24 +57,6 @@ class MatrixField(ScalarField):
         else:
             return 0.0
 
-    def to_dict(self) -> dict:
-        return {
-            "type": "MatrixField",
-            "min_corner": self.min_corner.tolist(),
-            "max_corner": self.max_corner.tolist(),
-            "data": self.data.tolist(),
-            "normalize": self.normalize,
-        }
-
-    @classmethod
-    def from_dict(cls, d: dict) -> "MatrixField":
-        return cls(
-            min_corner=np.array(d["min_corner"]),
-            max_corner=np.array(d["max_corner"]),
-            data=np.array(d["data"]),
-            normalize=d.get("normalize", False),
-        )
-
     def plot_figure(
         self,
         output_filename,
@@ -96,7 +77,6 @@ class MatrixField(ScalarField):
         plt.close()
 
 
-@_register_scalar
 class KernelProbabilisticMatrixField(MatrixField):
     """
     A matrix field that applies a Gaussian kernel to the input coordinates

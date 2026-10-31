@@ -1,18 +1,5 @@
 import numpy as np
 
-_SCALAR_REGISTRY: dict[str, type] = {}
-
-
-def _register_scalar(cls):
-    _SCALAR_REGISTRY[cls.__name__] = cls
-    return cls
-
-
-def scalar_from_dict(d: dict) -> "ScalarField":
-    """Reconstruct a ScalarField from its dict representation."""
-    return _SCALAR_REGISTRY[d["type"]].from_dict(d)
-
-
 class ScalarField():
     """
     Abstract base class for scalar fields.
@@ -29,11 +16,4 @@ class ScalarField():
         """
         Returns the scalar field value at point x.
         """
-        raise NotImplementedError("Subclasses should implement this method.")
-
-    def to_dict(self) -> dict:
-        raise NotImplementedError("Subclasses should implement this method.")
-
-    @classmethod
-    def from_dict(cls, d: dict) -> "ScalarField":
         raise NotImplementedError("Subclasses should implement this method.")
