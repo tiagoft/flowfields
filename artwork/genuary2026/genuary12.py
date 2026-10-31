@@ -39,7 +39,7 @@ def run():
         np.array([-5,-5]),
         direction=1,
     )
-    fieldnoise = tstudio.vector_fields.NoiseField(normalize=True)
+    fieldnoise = tstudio.vector_fields.NoiseField(normalize=True, distribution="uniform")
     wnoise = tstudio.scalar_fields.GaussianField(
         np.array([5,5]),
         sigma=5.0,

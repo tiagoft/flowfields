@@ -32,7 +32,7 @@ def run():
         direction=1,
         normalize=True,
     )
-    fieldNoise = tstudio.vector_fields.NoiseField()
+    fieldNoise = tstudio.vector_fields.NoiseField(distribution="uniform")
     fieldGaussian1 = tstudio.scalar_fields.GaussianField(
         center=np.array([-6, -6]),
         sigma=5.0,

@@ -96,9 +96,13 @@ Rays from a center: `v(x) = direction · (x − center)`. `direction=1` points o
 
 [`08-noise_field.py`](08-noise_field.py)
 
-A new random vector at every call, regardless of the position. Following it gives a random walk. Without normalization the steps are shorter on average, so the walk spreads less. Added to another field, it makes the lines rough.
+A new random vector at every call, regardless of the position. Following it gives a random walk. Without normalization the steps also vary in length. Added to another field, it makes the lines rough.
 
 ![Random walks with and without normalization, and a noisy rotation](outputs/08-noise_field.png)
+
+Each coordinate comes from a normal distribution by default, which makes all directions equally likely. With `distribution="uniform"` the vectors come from a square, which favors the diagonals. Each line below is one vector:
+
+![Directions of the gaussian and uniform distributions](outputs/08-noise_field_directions.png)
 
 ## Combining fields
 

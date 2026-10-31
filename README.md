@@ -28,7 +28,7 @@ A vector field maps a 2-D point to a 2-D vector: `F(x) → np.ndarray`.  Most fi
 | --- | --- |
 | `RotationField(center, direction)` | `v(x) = direction · [−rᵧ, rₓ]` where `r = x − center` |
 | `ExpansionField(center, direction)` | `v(x) = direction · (x − center)` |
-| `NoiseField()` | `v ~ Uniform(−1, 1)ⁿ` (fresh sample every call) |
+| `NoiseField(distribution)` | `v ~ Normal(0, 1)ⁿ` by default, or `v ~ Uniform(−1, 1)ⁿ` with `distribution="uniform"` (fresh sample every call) |
 
 #### Composite fields — combine other fields into a tree
 
