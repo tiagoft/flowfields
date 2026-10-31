@@ -15,3 +15,6 @@ wheels/
 
 # Figures shown in demos/README.md
 !demos/outputs/*.png
+
+# Old demos, kept only locally
+old_demos/
