@@ -1,9 +1,9 @@
-#from tstudio.color_fields.base import ColorField
+from tstudio.color_fields.base import ColorField
 import numpy as np
 from sklearn.cluster import KMeans
 
 
-class MatrixColorField():
+class MatrixColorField(ColorField):
     """
     A color field that is defined by a matrix of colors.
     """

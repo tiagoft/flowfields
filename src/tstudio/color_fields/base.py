@@ -6,6 +6,6 @@ class ColorField():
     ):
         pass
 
-    def __call__(self, x: np.ndarray) -> float:
+    def __call__(self, x: np.ndarray) -> np.ndarray:
         raise NotImplementedError("ColorField is an abstract class and cannot be called directly.")
     
