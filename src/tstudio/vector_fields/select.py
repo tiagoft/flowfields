@@ -37,7 +37,7 @@ class FieldSelect(FlowField):
     Args:
         fields: List of candidate ``FlowField`` instances.
         weights: Per-field scalar or ``ScalarField`` weights used as selection
-            probabilities.  Must be provided (not None) for probabilistic use.
+            probabilities.  ``None`` makes all fields equally likely.
         select_n: Number of fields to blend at each active selection.
         change_id_prob: Probability of resampling the active field on each call.
         temperature: Controls distribution flatness; 0 = proportional to weight,
@@ -68,7 +68,7 @@ class FieldSelect(FlowField):
 
         self.last_idx = self.select_index().tolist()
         fields = [self.list_of_fields[i] for i in self.last_idx]
-        weights = [self.weights[i] for i in self.last_idx]
+        weights = [self.weights[i] for i in self.last_idx] if self.weights is not None else None
         self.current_field = FieldSum(
             fields=fields,
             weights=weights,
@@ -80,16 +80,15 @@ class FieldSelect(FlowField):
 
         for idx, _ in enumerate(self.list_of_fields):
 
-            if self.weights is not None:
-                if x is not None:
-                    if isinstance(self.weights[idx], ScalarField):
-                        weight_value = self.weights[idx](x)
-                    else:
-                        weight_value = self.weights[idx]
-
-                    magnitudes.append(weight_value)
+            if self.weights is not None and x is not None:
+                if isinstance(self.weights[idx], ScalarField):
+                    weight_value = self.weights[idx](x)
                 else:
-                    magnitudes.append(1.0)
+                    weight_value = self.weights[idx]
+
+                magnitudes.append(weight_value)
+            else:
+                magnitudes.append(1.0)
 
         p = np.array(magnitudes) / np.sum(magnitudes)
         # Apply temperature to p, where higher temperature makes distribution more uniform
@@ -117,7 +116,7 @@ class FieldSelect(FlowField):
                 and self.lerp_count == 0:
             self.last_idx = self.select_index(x).tolist()
             fields = [self.list_of_fields[i] for i in self.last_idx]
-            weights = [self.weights[i] for i in self.last_idx]
+            weights = [self.weights[i] for i in self.last_idx] if self.weights is not None else None
             self.next_field = FieldSum(
                 fields=fields,
                 weights=weights,

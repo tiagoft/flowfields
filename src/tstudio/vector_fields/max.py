@@ -17,6 +17,7 @@ class FieldMax(FlowField):
     Weights can be fixed scalars or ``ScalarField`` instances evaluated at x,
     so the dominant field can change continuously across space.  This produces
     sharp, discontinuous transitions at boundaries where two weights are equal.
+    With ``weights=None`` all weights are equal, so the first field always wins.
 
     If ``normalize=True`` (default) the selected vector is divided by its L2
     norm.
@@ -49,6 +50,8 @@ class FieldMax(FlowField):
                 else:
                     weight_value = self.weights[idx]
                 magnitudes.append(weight_value)
+            else:
+                magnitudes.append(1.0)
 
         idx = np.argmax(magnitudes)
         y = self.list_of_fields[idx](x)
