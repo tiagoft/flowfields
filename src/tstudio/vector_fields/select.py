@@ -90,7 +90,10 @@ class FieldSelect(FlowField):
             else:
                 magnitudes.append(1.0)
 
-        p = np.array(magnitudes) / np.sum(magnitudes)
+        magnitudes = np.array(magnitudes, dtype=float)
+        total = np.sum(magnitudes)
+        # If every weight is zero here, fall back to a uniform choice
+        p = magnitudes / total if total > 0 else np.full(len(magnitudes), 1.0 / len(magnitudes))
         # Apply temperature to p, where higher temperature makes distribution more uniform
         if self.temperature > 0:
             p = p**(1.0 / (1.0 + self.temperature))
@@ -99,7 +102,9 @@ class FieldSelect(FlowField):
         idx = np.random.choice(
             len(self.list_of_fields),
             p=p,
-            size=self.select_n,
+            # Fields with zero probability are never drawn, even if that means
+            # blending fewer than select_n fields
+            size=min(self.select_n, np.count_nonzero(p)),
             replace=False,
         )
         return idx
