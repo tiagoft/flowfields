@@ -12,3 +12,6 @@ wheels/
 # Outputs
 *.png
 *.pdf
+
+# Figures shown in demos/README.md
+!demos/outputs/*.png

@@ -2,6 +2,8 @@
 
 A generative-art toolkit built around composable **vector fields** and **scalar fields**.  Fields form trees (similar to syntax trees): leaf nodes are primitives and internal nodes are combinators.
 
+See the [demos](demos/README.md) for a small script and a figure for each feature.
+
 ---
 
 ## Concepts
