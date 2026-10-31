@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.collections import LineCollection
 from matplotlib.colors import to_rgb
-from PIL import Image
+from tstudio.utils import open_image
 
 BACKGROUND = (0.961, 0.949, 0.922)
 BLUE = (0.196, 0.322, 0.482)
@@ -23,7 +23,7 @@ np.random.seed(0)
 
 def eiffel(mode="RGB"):
     """Loads eiffel.jpeg as floats in [0, 1]. Use mode="L" for grayscale."""
-    return np.array(Image.open(HERE / "eiffel.jpeg").convert(mode), dtype=float) / 255.0
+    return open_image(HERE / "eiffel.jpeg", mode)
 
 
 def panels(titles, xlim=SQUARE, ylim=SQUARE):

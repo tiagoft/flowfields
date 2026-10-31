@@ -1,4 +1,21 @@
 import numpy as np
+from PIL import Image
+
+
+def open_image(filename: str, mode: str = "RGB") -> np.ndarray:
+    """Open an image file as an array of pixels
+
+    Args:
+        filename (str): Path to the image file
+        mode (str): Pillow color mode. Use "RGB" for color and "L" for
+            grayscale.
+
+    Returns:
+        np.ndarray: Pixels as floats in [0, 1], with shape (H, W, 3) for "RGB"
+            and (H, W) for "L"
+    """
+    with Image.open(filename) as img:
+        return np.array(img.convert(mode), dtype=float) / 255.0
 
 
 def normalize_vector(v: np.ndarray) -> np.ndarray:
