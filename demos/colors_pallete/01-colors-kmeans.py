@@ -12,7 +12,7 @@ from sklearn.cluster import KMeans
 
 def run():
     curr_path = Path(__file__).parent
-    img = Image.open(curr_path / "sunset.jpg")
+    img = Image.open(curr_path / "../sunset.jpg")
     matrix_data = np.array(img, dtype=float) / 255.0
     X = matrix_data.reshape(-1, 3)
     print(X.shape)
