@@ -65,3 +65,10 @@ field = vf.FieldSum(
 x = np.array([1.0, 0.5])
 v = field(x)   # unit vector at point x
 ```
+
+## License
+
+flowfields is free software, released under the
+[GNU Affero General Public License v3.0 or later](LICENSE). Images and other
+works you make with it are yours; programs that use or modify the library,
+including sketches served on the web, must be shared under the same license.

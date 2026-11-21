@@ -1,6 +1,7 @@
 {
   "name": "flowfields",
   "private": true,
+  "license": "AGPL-3.0-or-later",
   "description": "p5.js port of flowfields, generated from src/flowfields by the port-js skill",
   "scripts": {
     "test": "node --test test/*.test.js"
