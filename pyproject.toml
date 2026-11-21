@@ -1,16 +1,13 @@
 [project]
 name = "flowfields"
 version = "0.1.0"
-description = "Add your description here"
+description = "Tools for artwork by composing flow fields"
 readme = "README.md"
 license = "AGPL-3.0-or-later"
 license-files = ["LICENSE"]
 requires-python = ">=3.13"
 dependencies = [
-    "ipykernel>=6.29.5",
-    "ipython>=9.2.0",
     "joblib>=1.5.1",
-    "jupyter>=1.1.1",
     "matplotlib>=3.10.3",
     "numpy>=2.2.6",
     "pillow>=11.2.1",
