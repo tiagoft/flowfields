@@ -4,6 +4,11 @@ Generative-art library of composable fields (`src/flowfields`), with demos in
 `demos/` and the Genuary 2026 pieces in `artwork/genuary2026/`. Run Python
 with `uv run`. Do not add other artworks to `artwork/`.
 
+The library gives fields and nothing that follows them: no line tracing,
+particles or integrators. People use flow fields for lines,
+movement, physics and more, with their own tools. Helpers for that belong
+in the demos, not in `src/flowfields`.
+
 ## The JS port
 
 `js/flowfields.js` is a p5.js version of `src/flowfields`, generated with the
