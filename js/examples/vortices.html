@@ -1,0 +1,173 @@
+<!doctype html>
+<!--
+  flowfields example: vortices. Drop-in: save this file anywhere and open it
+  in a browser. In the p5.js web editor or OpenProcessing (p5js mode), put the
+  two <script src> lines in index.html, or add the flowfields URL as a
+  library, and the code inside the last <script> in the sketch.
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>flowfields · vortices</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@2.4.0/lib/p5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/tiagoft/flowfields@v0.2.2/js/flowfields.js"></script>
+    <style>html, body { margin: 0; overflow: hidden; background: #000; }</style>
+  </head>
+  <body>
+    <script>
+      // Four vortices drift around the canvas. Each one is a rotation (with a
+      // random direction) plus an expansion, weighted by a Gaussian whose
+      // width breathes over time; the vortices add up to one normalized flow
+      // field. Particles follow it and are drawn with additive blending, so
+      // the paths they share glow white, while each frame slowly fades.
+
+      // ------------------------------------------------------------------
+      // Parameters
+      // ------------------------------------------------------------------
+
+      // Particles
+      let N_PARTICLES = 1500;
+      let SPEED = 1.2;              // pixels per frame
+      let PARTICLE_SIZE = 2.0;      // diameter, in pixels
+      let PARTICLE_ALPHA = 50;      // 0-255; lower needs more overlaps to reach white
+      let RESPAWN_PROB = 0.001;     // chance per frame that a particle restarts at a random point
+      let PALETTE = [               // purple, violet and cyan tones, one picked per particle
+        "#7b2ff7", "#9d4edd", "#c77dff", "#5a4fcf", "#00b4d8", "#48cae4", "#00f5ff",
+      ];
+
+      // Trails
+      let FADE = 250;               // gray multiplied over each frame: 255 never fades, lower fades faster
+      let FADE_FLOOR = 3;           // also subtracted each frame, so faint trails reach black; 0 leaves a gray haze
+      let BACKGROUND = 0;
+
+      // Vortices
+      let N_VORTICES = 4;
+      let EXPANSION_WEIGHT = 0.4;   // weight of each expansion next to its rotation (which has weight 1)
+      let EXPANSION_DIRECTION = -1; // -1 pulls toward each center, so paths gather and glow; 1 pushes away
+      let LAYOUT_RADIUS = 0.22;     // the vortices start on a circle of this radius (fraction of the shorter side)
+      let ORBIT_RADIUS = 0.16;      // how far each center wanders from its start (fraction of the shorter side)
+      let ORBIT_SPEED = 0.0035;     // base angular speed of the centers, radians per frame
+
+      // Gaussians
+      let SIGMA = 0.2;              // mean width of each Gaussian (fraction of the shorter side)
+      let SIGMA_AMPLITUDE = 0.08;   // how much the width breathes around SIGMA (same unit)
+      let SIGMA_SPEED = 0.006;      // base angular speed of the breathing, radians per frame
+
+      let SEED = null;              // a number repeats the same drawing; null gives a new one each time
+
+      // ------------------------------------------------------------------
+
+      const { RotationField, ExpansionField, FieldSum, GaussianField, vec } = flowfields;
+
+      // Square roots of distinct primes: no two are rational multiples of
+      // each other, so the trajectories and the breathing never repeat.
+      const ROOTS = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53]
+        .map((p) => Math.sqrt(p) / Math.sqrt(2));
+
+      let vortices = [];
+      let field;
+      let particles = [];
+      let time = 0;
+
+      function setup() {
+        createCanvas(windowWidth, windowHeight);
+        pixelDensity(1);
+        if (SEED !== null) randomSeed(SEED);
+        background(BACKGROUND);
+        noStroke();
+        buildField();
+        particles = [];
+        for (let i = 0; i < N_PARTICLES; i++) particles.push(newParticle());
+      }
+
+      function buildField() {
+        const side = min(width, height);
+        vortices = [];
+        for (let i = 0; i < N_VORTICES; i++) {
+          const angle = TWO_PI * i / N_VORTICES + random(-0.3, 0.3);
+          const start = vec(width / 2 + LAYOUT_RADIUS * side * cos(angle),
+                            height / 2 + LAYOUT_RADIUS * side * sin(angle));
+          const rotation = new RotationField({ center: start, direction: random() < 0.5 ? 1 : -1 });
+          const expansion = new ExpansionField({ center: start, direction: EXPANSION_DIRECTION });
+          const gaussian = new GaussianField({ center: start, sigma: SIGMA * side });
+          vortices.push({
+            start, rotation, expansion, gaussian,
+            pair: new FieldSum({ fields: [rotation, expansion], weights: [1.0, EXPANSION_WEIGHT] }),
+            // each vortex gets its own frequencies and phases
+            freqX: ORBIT_SPEED * ROOTS[(4 * i) % ROOTS.length],
+            freqY: ORBIT_SPEED * ROOTS[(4 * i + 1) % ROOTS.length],
+            freqSigma: SIGMA_SPEED * ROOTS[(4 * i + 2) % ROOTS.length],
+            phaseX: random(TWO_PI),
+            phaseY: random(TWO_PI),
+            phaseSigma: random(TWO_PI),
+          });
+        }
+        // the pairs weighted by their Gaussians, added and normalized to length 1
+        field = new FieldSum({
+          fields: vortices.map((v) => v.pair),
+          weights: vortices.map((v) => v.gaussian),
+          normalize: true,
+        });
+      }
+
+      /** Moves the centers along their curves and lets the Gaussians breathe. */
+      function updateVortices() {
+        const side = min(width, height);
+        for (const v of vortices) {
+          const x = v.start.x + ORBIT_RADIUS * side * sin(v.freqX * time + v.phaseX);
+          const y = v.start.y + ORBIT_RADIUS * side * cos(v.freqY * time + v.phaseY);
+          v.rotation.center.set(x, y);
+          v.expansion.center.set(x, y);
+          v.gaussian.center.set(x, y);
+          v.gaussian.sigma = side * (SIGMA + SIGMA_AMPLITUDE * cos(v.freqSigma * time + v.phaseSigma));
+        }
+      }
+
+      function newParticle() {
+        const c = color(random(PALETTE));
+        c.setAlpha(PARTICLE_ALPHA);
+        return { position: vec(random(width), random(height)), color: c };
+      }
+
+      function draw() {
+        // fade: multiply the whole frame by a gray close to white
+        blendMode(MULTIPLY);
+        fill(FADE);
+        rect(0, 0, width, height);
+        // Multiplying 8-bit colors rounds faint pixels back to themselves, so
+        // they never reach black. DIFFERENCE with a dark gray subtracts it
+        // (|v - FADE_FLOOR|), which clears them.
+        if (FADE_FLOOR > 0) {
+          blendMode(DIFFERENCE);
+          fill(FADE_FLOOR);
+          rect(0, 0, width, height);
+        }
+
+        updateVortices();
+
+        // particles: additive, so overlapping paths add up to white
+        blendMode(ADD);
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          p.position.add(field.at(p.position).mult(SPEED));
+          const outside = p.position.x < 0 || p.position.x > width || p.position.y < 0 || p.position.y > height;
+          if (outside || random() < RESPAWN_PROB) {
+            particles[i] = newParticle();
+            continue;
+          }
+          fill(p.color);
+          circle(p.position.x, p.position.y, PARTICLE_SIZE);
+        }
+        blendMode(BLEND);
+
+        time += 1;
+      }
+
+      function windowResized() {
+        resizeCanvas(windowWidth, windowHeight);
+        background(BACKGROUND);
+        buildField();
+      }
+    </script>
+  </body>
+</html>
