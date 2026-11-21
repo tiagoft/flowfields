@@ -1,6 +1,7 @@
 """Abstract base class for scalar fields."""
 
 import numpy as np
+from flowfields.utils import warn_unused_arguments
 
 class ScalarField():
     """
@@ -11,8 +12,8 @@ class ScalarField():
     weights in ``FieldSum``, ``FieldMax``, and ``FieldSelect``.
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, **kwargs):
+        warn_unused_arguments(self, kwargs)
 
     def __call__(self, x: np.ndarray) -> float:
         """

@@ -3,7 +3,7 @@
 import numpy as np
 
 from flowfields.scalar_fields import ScalarField
-from flowfields.utils import normalize_vector
+from flowfields.utils import normalize_vector, warn_unused_arguments
 from flowfields.vector_fields.base import FlowField
 from flowfields.vector_fields.sum import FieldSum
 
@@ -66,7 +66,9 @@ class FieldSelect(FlowField):
         normalize: bool = True,
         lerp_len: int = 0,
         rng: np.random.Generator | int | None = None,
+        **kwargs,
     ):
+        warn_unused_arguments(self, kwargs)
         self.list_of_fields = fields
         self.weights = weights
         self.change_id_prob = change_id_prob

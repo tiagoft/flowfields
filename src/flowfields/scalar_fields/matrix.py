@@ -3,6 +3,7 @@
 import numpy as np
 
 from flowfields.scalar_fields.base import ScalarField
+from flowfields.utils import warn_unused_arguments
 
 
 class MatrixField(ScalarField):
@@ -28,7 +29,9 @@ class MatrixField(ScalarField):
         max_corner: np.ndarray,
         data: np.ndarray,
         normalize: bool = False,
+        **kwargs,
     ):
+        warn_unused_arguments(self, kwargs)
         min_corner_ = np.minimum(min_corner, max_corner)
         max_corner_ = np.maximum(min_corner, max_corner)
         self.min_corner = min_corner_
@@ -132,7 +135,9 @@ class KernelProbabilisticMatrixField(MatrixField):
         data: np.ndarray,
         normalize: bool = False,
         sigma: float = 1.0,
+        **kwargs,
     ):
+        warn_unused_arguments(self, kwargs)
         super().__init__(
             min_corner,
             max_corner,

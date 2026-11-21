@@ -3,7 +3,7 @@
 import numpy as np
 
 from flowfields.color_fields.base import ColorField
-from flowfields.utils import kmeans
+from flowfields.utils import kmeans, warn_unused_arguments
 
 
 class MatrixColorField(ColorField):
@@ -46,8 +46,9 @@ class MatrixColorField(ColorField):
         kernel_size: float = 0.05,
         temperature: float = 1.0,
         rng: np.random.Generator | int | None = None,
+        **kwargs,
     ):
-        super().__init__()
+        warn_unused_arguments(self, kwargs)
         self.min_corner = min_corner
         self.max_corner = max_corner
         self.data = data

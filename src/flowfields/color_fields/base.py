@@ -1,6 +1,7 @@
 """Abstract base class for color fields."""
 
 import numpy as np
+from flowfields.utils import warn_unused_arguments
 
 class ColorField():
     """
@@ -12,8 +13,9 @@ class ColorField():
 
     def __init__(
         self,
+        **kwargs,
     ):
-        pass
+        warn_unused_arguments(self, kwargs)
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
         """

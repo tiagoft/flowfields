@@ -3,6 +3,7 @@
 import numpy as np
 
 from flowfields.scalar_fields.base import ScalarField
+from flowfields.utils import warn_unused_arguments
 
 
 class GaussianField(ScalarField):
@@ -26,7 +27,9 @@ class GaussianField(ScalarField):
     def __init__(self,
                  center: np.ndarray,
                  sigma: float = 1.0,
-                 scale: float = 1.0):
+                 scale: float = 1.0,
+                 **kwargs):
+        warn_unused_arguments(self, kwargs)
         self.center = center
         self.sigma = sigma
         self.scale = scale

@@ -113,6 +113,26 @@ x = np.array([1.0, 0.5])
 v = field(x)   # unit vector at point x
 ```
 
+### Swapping fields
+
+Fields accept keyword arguments they do not use, so one field type can
+replace another with a slightly different API. Each unused argument gives an
+`UnusedArgumentWarning`, which also catches typos:
+
+```python
+vf.RotationField(center, normalise=False)
+# UnusedArgumentWarning: RotationField ignores the argument 'normalise' (did you mean 'normalize'?)
+```
+
+To swap fields on purpose without the warning:
+
+```python
+import warnings
+import flowfields
+
+warnings.simplefilter("ignore", flowfields.UnusedArgumentWarning)
+```
+
 ## Gallery
 
 Pieces made with flowfields for [Genuary 2026](https://genuary.art). Click an image to see its code.

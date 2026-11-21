@@ -3,6 +3,7 @@
 import numpy as np
 
 from flowfields.scalar_fields.base import ScalarField
+from flowfields.utils import warn_unused_arguments
 
 
 class BoxField(ScalarField):
@@ -32,7 +33,9 @@ class BoxField(ScalarField):
         max_corner: np.ndarray,
         inside_value: float = 1.0,
         outside_value: float = 0.0,
+        **kwargs,
     ):
+        warn_unused_arguments(self, kwargs)
         min_corner_ = np.minimum(min_corner, max_corner)
         max_corner_ = np.maximum(min_corner, max_corner)
         self.min_corner = min_corner_

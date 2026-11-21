@@ -1,6 +1,7 @@
 """Abstract base class for vector fields."""
 
 import numpy as np
+from flowfields.utils import warn_unused_arguments
 
 class FlowField():
     """
@@ -15,7 +16,7 @@ class FlowField():
         self,
         **kwargs,
     ):
-        pass
+        warn_unused_arguments(self, kwargs)
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
         """

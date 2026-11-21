@@ -3,6 +3,7 @@
 import numpy as np
 
 from flowfields.scalar_fields.base import ScalarField
+from flowfields.utils import warn_unused_arguments
 
 
 class ConstantField(ScalarField):
@@ -18,7 +19,8 @@ class ConstantField(ScalarField):
         value: The constant scalar value returned at every point (default 1.0).
     """
 
-    def __init__(self, value: float = 1.0):
+    def __init__(self, value: float = 1.0, **kwargs):
+        warn_unused_arguments(self, kwargs)
         self.value = value
 
     def __call__(self, x: np.ndarray) -> float:

@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from flowfields.utils import normalize_vector
+from flowfields.utils import normalize_vector, warn_unused_arguments
 from flowfields.vector_fields.base import FlowField
 
 
@@ -29,7 +29,7 @@ class NoiseField(FlowField):
             ``"uniform"``.
         rng: Random generator, or a seed for one.  ``None`` takes a fresh
             seed from the operating system.
-        **kwargs: Ignored.
+        **kwargs: Not used; each one gives an ``UnusedArgumentWarning``.
     """
 
     def __init__(
@@ -39,7 +39,7 @@ class NoiseField(FlowField):
         rng: np.random.Generator | int | None = None,
         **kwargs,
     ):
-        super().__init__()
+        warn_unused_arguments(self, kwargs)
         if distribution not in ("gaussian", "uniform"):
             raise ValueError(f"Unknown distribution: {distribution}")
         self.normalize = normalize

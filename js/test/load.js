@@ -1,5 +1,5 @@
 // Loads p5.js and flowfields.js inside jsdom, as a browser page would, and
-// returns { p5, flowfields }.
+// returns { p5, flowfields, window, close }.
 const fs = require("fs");
 const path = require("path");
 const { JSDOM, VirtualConsole } = require("jsdom");
@@ -30,7 +30,12 @@ function load() {
   const sketch = new dom.window.p5(() => {});
   const flowfieldsSource = fs.readFileSync(path.join(__dirname, "..", "flowfields.js"), "utf8");
   dom.window.eval(flowfieldsSource);
-  return { p5: dom.window.p5, flowfields: dom.window.flowfields, close: () => { sketch.remove(); dom.window.close(); } };
+  return {
+    p5: dom.window.p5,
+    flowfields: dom.window.flowfields,
+    window: dom.window,
+    close: () => { sketch.remove(); dom.window.close(); },
+  };
 }
 
 module.exports = { load };
