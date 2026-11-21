@@ -1,6 +1,6 @@
 [project]
 name = "flowfields"
-version = "0.1.12"
+version = "0.1.13"
 description = "Tools for artwork by composing flow fields"
 readme = "README.md"
 license = "AGPL-3.0-or-later"
@@ -58,8 +58,12 @@ dev = [
     "matplotlib>=3.7",
     "pycairo>=1.29.0",
     "pytest>=8",
+    "pytest-cov>=5",
     "tqdm>=4.67.1",
 ]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["flowfields"]

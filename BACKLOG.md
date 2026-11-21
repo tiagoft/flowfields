@@ -18,7 +18,8 @@ LICENSE.
 - [ ] Make the README links absolute
       (`https://raw.githubusercontent.com/tiagoft/flowfields/main/...` for
       images, `https://github.com/tiagoft/flowfields/blob/main/...` for
-      files). The README becomes the PyPI page, where relative links break.
+      files), including the two badges, which climb out of the file with
+      `../../`. The README becomes the PyPI page, where relative links break.
       Do it only after the repository is public: while it is private,
       absolute links break on GitHub itself, because GitHub loads images
       through a proxy that has no access to it.
@@ -52,7 +53,7 @@ LICENSE.
 ### Checks
 
 - [x] Python tests with `pytest`, at least one per field and per helper.
-- [ ] A GitHub Action that runs `pytest` on Python 3.10 to 3.13 and
+- [x] A GitHub Action that runs `pytest` on Python 3.10 to 3.13 and
       `npm test` in `js/`.
 - [ ] `uv build`, `uvx twine check dist/*`, then install the wheel in a new
       virtual environment and run the README example there.

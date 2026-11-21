@@ -1,5 +1,8 @@
 # flowfields
 
+[![tests](../../actions/workflows/tests.yml/badge.svg)](../../actions/workflows/tests.yml)
+[![coverage](../../raw/badges/coverage.svg)](../../actions/workflows/tests.yml)
+
 ![An image of the Eiffel tower drawn with colored lines that follow a tree of fields](demos/outputs/16-field_tree.png)
 
 A generative-art toolkit built around composable **vector fields** and **scalar fields**.  Fields form trees (similar to syntax trees): leaf nodes are primitives and internal nodes are combinators.  It comes in Python and as a [p5.js](https://p5js.org) library.

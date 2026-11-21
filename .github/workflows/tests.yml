@@ -1,0 +1,87 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    name: Python ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Run pytest
+        run: uv run --locked --python ${{ matrix.python }} pytest -q
+
+  python-lowest:
+    # The lowest versions that pyproject.toml allows, on the lowest Python
+    name: Python 3.10, lowest dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Run pytest
+        run: uv run --isolated --python 3.10 --resolution lowest-direct --with "pytest>=8" pytest -q
+
+  js:
+    name: JS port
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: js
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: js/package-lock.json
+      - run: npm ci
+      - run: npm test
+
+  coverage:
+    # Pushes coverage.svg to the badges branch, which the README shows
+    name: Coverage badge
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Measure coverage
+        run: uv run --locked pytest -q --cov --cov-report=term --cov-report=json
+      - name: Make the badge
+        run: uv run --locked python tools/coverage_badge.py coverage.json "$RUNNER_TEMP/coverage.svg"
+      - name: Push it to the badges branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin badges >/dev/null; then
+            git fetch --depth 1 origin badges
+            git worktree add "$RUNNER_TEMP/badges" FETCH_HEAD
+            cd "$RUNNER_TEMP/badges"
+            git switch -c badges
+          else
+            git worktree add --detach "$RUNNER_TEMP/badges"
+            cd "$RUNNER_TEMP/badges"
+            git switch --orphan badges
+          fi
+          cp "$RUNNER_TEMP/coverage.svg" coverage.svg
+          git add coverage.svg
+          if git diff --cached --quiet; then
+            echo "The badge did not change"
+          else
+            git commit -m "chore: coverage badge for ${GITHUB_SHA::7}"
+            git push origin badges
+          fi
