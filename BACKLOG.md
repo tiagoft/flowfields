@@ -3,13 +3,76 @@
 Ideas that are planned but not started. Move an item out of here when its
 work begins.
 
-## Before publishing to PyPI
+## Publishing to PyPI
 
-The README becomes the PyPI page, where relative links break. Make its links
-absolute (`https://raw.githubusercontent.com/tiagoft/flowfields/main/...` for
-images, `https://github.com/tiagoft/flowfields/blob/main/...` for files) once
-the repository is public. While it is private, absolute links break on GitHub
-itself, because GitHub loads images through a proxy that has no access to it.
+The name `flowfields` was free on PyPI and npm on 2026-11-21. `uv build` and
+`twine check` already pass; the wheel holds only `src/flowfields` and the
+LICENSE.
+
+### The repository goes public
+
+- [ ] Decide whether to recreate the GitHub repository first. Commits from
+      before the history rewrite, with private artwork, may still be reachable
+      by hash on GitHub.
+- [ ] Make the repository public.
+- [ ] Make the README links absolute
+      (`https://raw.githubusercontent.com/tiagoft/flowfields/main/...` for
+      images, `https://github.com/tiagoft/flowfields/blob/main/...` for
+      files). The README becomes the PyPI page, where relative links break.
+      Do it only after the repository is public: while it is private,
+      absolute links break on GitHub itself, because GitHub loads images
+      through a proxy that has no access to it.
+
+### Package contents
+
+- [ ] Delete `src/flowfields/main.py`, a placeholder that prints a greeting,
+      and the commented `[project.scripts]` in `pyproject.toml`.
+- [ ] Delete the empty `src/flowfields/color_fields/utils.py`.
+- [ ] `__version__` in `flowfields/__init__.py`, read with
+      `importlib.metadata.version("flowfields")` so the version hook stays the
+      only place that changes it.
+- [ ] Imports at the package level, so `import flowfields as ff` gives
+      `ff.RotationField`, `ff.GaussianField` and so on.
+- [ ] An empty `py.typed`, so type checkers use the annotations.
+
+### Metadata in `pyproject.toml`
+
+- [ ] `requires-python = ">=3.10"`: the code needs nothing newer.
+- [ ] `authors`.
+- [ ] `[project.urls]`: Homepage, Source, Issues and the demos.
+- [ ] `keywords`: generative art, flow field, vector field, creative coding,
+      p5.js.
+- [ ] `classifiers`: development status, Python versions,
+      `Topic :: Artistic Software`, `Topic :: Multimedia :: Graphics`. No
+      license classifier: `license = "AGPL-3.0-or-later"` replaces it.
+- [ ] Decide whether `scikit-learn` (only `MatrixColorField`) and
+      `matplotlib` (only `MatrixField.plot_figure`) become optional extras,
+      such as `flowfields[color]`. Then their imports move inside the code
+      that uses them, with an error message that names the extra.
+
+### Checks
+
+- [ ] Python tests with `pytest`, at least one per field and per helper.
+- [ ] A GitHub Action that runs `pytest` on Python 3.10 to 3.13 and
+      `npm test` in `js/`.
+- [ ] `uv build`, `uvx twine check dist/*`, then install the wheel in a new
+      virtual environment and run the README example there.
+
+### Publishing
+
+- [ ] Choose the first public version: the current `0.1.x`, or `0.2.0` to
+      mark the release.
+- [ ] Create a PyPI account with two-factor authentication, and a TestPyPI
+      account.
+- [ ] Set up trusted publishing: a GitHub Action publishes when a `v*` tag
+      is pushed, with no token stored anywhere.
+- [ ] Decide how tags are created: by hand when releasing, or by the version
+      hook on every merge. jsDelivr needs the tags to serve a fixed version
+      of `flowfields.js`.
+- [ ] Publish to TestPyPI first, and install from there with
+      `pip install -i https://test.pypi.org/simple/ flowfields`.
+- [ ] Publish to PyPI, and check `pip install flowfields` in a clean
+      environment.
 
 ## Tracing lines through a field
 
