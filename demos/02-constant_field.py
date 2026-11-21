@@ -1,6 +1,6 @@
 import numpy as np
-import tstudio.scalar_fields as sf
-import tstudio.vector_fields as vf
+import flowfields.scalar_fields as sf
+import flowfields.vector_fields as vf
 from _common import panels, save, strokes
 
 # A constant weight sets how much of each field goes into a blend everywhere:

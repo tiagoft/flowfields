@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import tstudio.vector_fields
-import tstudio.scalar_fields
-import tstudio.utils
+import flowfields.vector_fields
+import flowfields.scalar_fields
+import flowfields.utils
 from tqdm import tqdm
 import cairo
 
@@ -20,11 +20,11 @@ def run():
         box_min = center - size / 2
         box_max = center + size / 2
 
-        field = tstudio.vector_fields.RotationField(
+        field = flowfields.vector_fields.RotationField(
             center,
             direction=np.random.choice([-1, 1]),
         )
-        box = tstudio.scalar_fields.BoxField(
+        box = flowfields.scalar_fields.BoxField(
             box_min,
             box_max,
             inside_value=value,
@@ -35,18 +35,18 @@ def run():
 
 
 
-    field0 = tstudio.vector_fields.ExpansionField(
+    field0 = flowfields.vector_fields.ExpansionField(
         np.array([-5,-5]),
         direction=1,
     )
-    fieldnoise = tstudio.vector_fields.NoiseField(normalize=True, distribution="uniform")
-    wnoise = tstudio.scalar_fields.GaussianField(
+    fieldnoise = flowfields.vector_fields.NoiseField(normalize=True, distribution="uniform")
+    wnoise = flowfields.scalar_fields.GaussianField(
         np.array([5,5]),
         sigma=5.0,
         scale=0.1,
     )
-    w0 = tstudio.scalar_fields.ConstantField(0.05)
-    bf_field = tstudio.vector_fields.FieldSum(
+    w0 = flowfields.scalar_fields.ConstantField(0.05)
+    bf_field = flowfields.vector_fields.FieldSum(
         fields=[field0, fieldnoise],
         weights=[w0, wnoise],
     )
@@ -56,12 +56,12 @@ def run():
     
     fields.append(bf_field)
     weights = boxes + [w0]
-    field = tstudio.vector_fields.FieldMax(
+    field = flowfields.vector_fields.FieldMax(
         fields=fields,
         weights=weights,
     )
 
-    c1 = tstudio.scalar_fields.GaussianField(np.array([0.7, 1.1]), sigma=2)
+    c1 = flowfields.scalar_fields.GaussianField(np.array([0.7, 1.1]), sigma=2)
     colorization = lambda x: 0.01 + 0.99 * np.tanh(c1(x))
 
     width_cm = 10
@@ -103,9 +103,9 @@ def run():
         for _ in range(n_steps):
             dx = field(x) * step_size
             if rotation_angle != 0:
-                dx = tstudio.utils.rotate_vector(dx, rotation_angle)
+                dx = flowfields.utils.rotate_vector(dx, rotation_angle)
             if quantization_levels is not None:
-                dx = tstudio.utils.quantize_vector(dx, quantization_levels)
+                dx = flowfields.utils.quantize_vector(dx, quantization_levels)
             x_ = x + dx
             ctx.line_to(x_[0], x_[1])
             x = x_

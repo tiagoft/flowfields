@@ -1,6 +1,6 @@
 import numpy as np
-import tstudio.scalar_fields as sf
-import tstudio.vector_fields as vf
+import flowfields.scalar_fields as sf
+import flowfields.vector_fields as vf
 from _common import RNG, panels, save, strokes
 
 # FieldSelect keeps switching between fields as it is called, so a single long

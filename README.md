@@ -1,4 +1,4 @@
-# tstudio
+# flowfields
 
 A generative-art toolkit built around composable **vector fields** and **scalar fields**.  Fields form trees (similar to syntax trees): leaf nodes are primitives and internal nodes are combinators.
 
@@ -8,7 +8,7 @@ See the [demos](demos/README.md) for a small script and a figure for each featur
 
 ## Concepts
 
-### Scalar fields — `tstudio.scalar_fields`
+### Scalar fields — `flowfields.scalar_fields`
 
 A scalar field maps a 2-D point to a single float: `f(x) → float`.  They are used as spatial weights inside composite vector fields.
 
@@ -18,7 +18,7 @@ A scalar field maps a 2-D point to a single float: `f(x) → float`.  They are u
 | `ConstantField(value)` | `f(x) = value` |
 | `BoxField(min_corner, max_corner, inside_value, outside_value)` | `inside_value` if `x` is inside the box, else `outside_value` |
 
-### Vector fields — `tstudio.vector_fields`
+### Vector fields — `flowfields.vector_fields`
 
 A vector field maps a 2-D point to a 2-D vector: `F(x) → np.ndarray`.  Most fields accept `normalize=True` (default) to return a unit vector.
 
@@ -46,8 +46,8 @@ Weights can be a plain `float`, a `ScalarField` instance (position-dependent), o
 
 ```python
 import numpy as np
-import tstudio.scalar_fields as sf
-import tstudio.vector_fields as vf
+import flowfields.scalar_fields as sf
+import flowfields.vector_fields as vf
 
 field = vf.FieldSum(
     fields=[

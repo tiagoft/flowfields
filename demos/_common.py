@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.collections import LineCollection
 from matplotlib.colors import to_rgb
-from tstudio.utils import open_image
+from flowfields.utils import open_image
 
 BACKGROUND = (0.961, 0.949, 0.922)
 BLUE = (0.196, 0.322, 0.482)

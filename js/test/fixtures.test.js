@@ -6,7 +6,7 @@ const fs = require("fs");
 const path = require("path");
 const { load } = require("./load");
 
-const { p5, tstudio, close } = load();
+const { p5, flowfields, close } = load();
 test.after(close);
 
 const { cases } = JSON.parse(fs.readFileSync(path.join(__dirname, "fixtures.json"), "utf8"));
@@ -21,8 +21,8 @@ function build(spec) {
     if ("vec" in spec) return new p5.Vector(spec.vec[0], spec.vec[1]);
     if ("array" in spec) return spec.array;
     if ("type" in spec) {
-      const Cls = tstudio[spec.type];
-      assert.ok(Cls, `tstudio.${spec.type} is missing`);
+      const Cls = flowfields[spec.type];
+      assert.ok(Cls, `flowfields.${spec.type} is missing`);
       const args = {};
       for (const [k, v] of Object.entries(spec.args)) args[camel(k)] = build(v);
       return new Cls(args);
@@ -62,8 +62,8 @@ for (const c of cases) {
     });
   } else if (c.kind === "util") {
     test(`util ${c.name}(${JSON.stringify(c.args)})`, () => {
-      const fn = tstudio[camel(c.fn)];
-      assert.ok(fn, `tstudio.${camel(c.fn)} is missing`);
+      const fn = flowfields[camel(c.fn)];
+      assert.ok(fn, `flowfields.${camel(c.fn)} is missing`);
       const args = build(c.args);
       const before = JSON.stringify(plain(args));
       close_(plain(fn(...args)), c.expected, c.fn);

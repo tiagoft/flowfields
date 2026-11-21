@@ -1,6 +1,6 @@
-// tstudio.js — p5.js port of the tstudio Python library.
+// flowfields.js — p5.js port of the flowfields Python library.
 //
-// GENERATED from src/tstudio by the port-js skill (.claude/skills/port-js).
+// GENERATED from src/flowfields by the port-js skill (.claude/skills/port-js).
 // Do not edit by hand: change the Python code and run /port-js again.
 //
 // source-commit: 009fcb6
@@ -11,7 +11,7 @@
 // Usage: load p5.js, then this file, and build fields inside setup() or later
 // (p5 2.x only finishes setting up p5.Vector when the sketch starts).
 //
-//   const { RotationField, GaussianField, FieldSum } = tstudio;
+//   const { RotationField, GaussianField, FieldSum } = flowfields;
 
 (function (root) {
   "use strict";
@@ -134,7 +134,7 @@
   }
 
   // ---------------------------------------------------------------------------
-  // src/tstudio/utils.py
+  // src/flowfields/utils.py
   // ---------------------------------------------------------------------------
 
   /** Normalize a vector. A zero vector is returned unchanged. */
@@ -190,7 +190,7 @@
   }
 
   // ---------------------------------------------------------------------------
-  // src/tstudio/scalar_fields/base.py
+  // src/flowfields/scalar_fields/base.py
   // ---------------------------------------------------------------------------
 
   /** Abstract base class for scalar fields. Subclasses implement at(x). */
@@ -201,7 +201,7 @@
   }
 
   // ---------------------------------------------------------------------------
-  // src/tstudio/scalar_fields/constant.py
+  // src/flowfields/scalar_fields/constant.py
   // ---------------------------------------------------------------------------
 
   /** f(x) = value */
@@ -217,7 +217,7 @@
   }
 
   // ---------------------------------------------------------------------------
-  // src/tstudio/scalar_fields/gaussian.py
+  // src/flowfields/scalar_fields/gaussian.py
   // ---------------------------------------------------------------------------
 
   /** f(x) = scale * exp(-||x - center||^2 / (2 * sigma^2)) */
@@ -236,7 +236,7 @@
   }
 
   // ---------------------------------------------------------------------------
-  // src/tstudio/scalar_fields/box.py
+  // src/flowfields/scalar_fields/box.py
   // ---------------------------------------------------------------------------
 
   /** insideValue inside the box (borders included), outsideValue elsewhere. */
@@ -263,7 +263,7 @@
   }
 
   // ---------------------------------------------------------------------------
-  // src/tstudio/scalar_fields/matrix.py
+  // src/flowfields/scalar_fields/matrix.py
   // ---------------------------------------------------------------------------
 
   /**
@@ -343,7 +343,7 @@
   }
 
   // ---------------------------------------------------------------------------
-  // src/tstudio/vector_fields/base.py
+  // src/flowfields/vector_fields/base.py
   // ---------------------------------------------------------------------------
 
   /** Abstract base class for 2D vector fields. Subclasses implement at(x). */
@@ -359,7 +359,7 @@
   }
 
   // ---------------------------------------------------------------------------
-  // src/tstudio/vector_fields/rotation.py
+  // src/flowfields/vector_fields/rotation.py
   // ---------------------------------------------------------------------------
 
   /** v(x) = direction * [-r_y, r_x], r = x - center */
@@ -380,7 +380,7 @@
   }
 
   // ---------------------------------------------------------------------------
-  // src/tstudio/vector_fields/expansion.py
+  // src/flowfields/vector_fields/expansion.py
   // ---------------------------------------------------------------------------
 
   /** v(x) = direction * (x - center) */
@@ -400,7 +400,7 @@
   }
 
   // ---------------------------------------------------------------------------
-  // src/tstudio/vector_fields/noise.py
+  // src/flowfields/vector_fields/noise.py
   // ---------------------------------------------------------------------------
 
   /** A fresh random vector at every call, regardless of x. */
@@ -428,7 +428,7 @@
   }
 
   // ---------------------------------------------------------------------------
-  // src/tstudio/vector_fields/sum.py
+  // src/flowfields/vector_fields/sum.py
   // ---------------------------------------------------------------------------
 
   /** v(x) = sum_i w_i(x) * F_i(x) */
@@ -453,7 +453,7 @@
   }
 
   // ---------------------------------------------------------------------------
-  // src/tstudio/vector_fields/max.py
+  // src/flowfields/vector_fields/max.py
   // ---------------------------------------------------------------------------
 
   /** v(x) = F_i*(x), i* = argmax_i w_i(x) (first one on ties) */
@@ -513,7 +513,7 @@
     return rows;
   }
 
-  const tstudio = {
+  const flowfields = {
     // random
     Generator, defaultRng,
     // utils
@@ -528,6 +528,6 @@
     vec, asVector, imageToMatrix,
   };
 
-  root.tstudio = tstudio;
-  if (typeof module !== "undefined" && module.exports) module.exports = tstudio;
+  root.flowfields = flowfields;
+  if (typeof module !== "undefined" && module.exports) module.exports = flowfields;
 })(typeof globalThis !== "undefined" ? globalThis : this);

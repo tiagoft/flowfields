@@ -2,8 +2,8 @@
 
 import numpy as np
 
-from tstudio.utils import normalize_vector
-from tstudio.vector_fields.base import FlowField
+from flowfields.utils import normalize_vector
+from flowfields.vector_fields.base import FlowField
 
 
 class ExpansionField(FlowField):

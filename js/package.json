@@ -1,7 +1,7 @@
 {
-  "name": "tstudio-js",
+  "name": "flowfields",
   "private": true,
-  "description": "p5.js port of tstudio, generated from src/tstudio by the port-js skill",
+  "description": "p5.js port of flowfields, generated from src/flowfields by the port-js skill",
   "scripts": {
     "test": "node --test test/*.test.js"
   },

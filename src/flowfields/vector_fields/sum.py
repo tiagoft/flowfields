@@ -2,9 +2,9 @@
 
 import numpy as np
 
-from tstudio.scalar_fields import ScalarField
-from tstudio.utils import normalize_vector
-from tstudio.vector_fields.base import FlowField
+from flowfields.scalar_fields import ScalarField
+from flowfields.utils import normalize_vector
+from flowfields.vector_fields.base import FlowField
 
 
 class FieldSum(FlowField):

@@ -1,4 +1,4 @@
-import tstudio.scalar_fields as sf
+import flowfields.scalar_fields as sf
 from _common import EIFFEL_MAX, EIFFEL_MIN, EIFFEL_X, EIFFEL_Y, eiffel, heatmap, panels, save
 
 # The matrix is multiplied by a Gaussian centered on the bounding box. Sigma is

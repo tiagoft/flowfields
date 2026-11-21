@@ -1,5 +1,5 @@
 import numpy as np
-from tstudio.color_fields import MatrixColorField
+from flowfields.color_fields import MatrixColorField
 from _common import EIFFEL_MAX, EIFFEL_MIN, EIFFEL_X, EIFFEL_Y, RNG, eiffel, panels, save
 
 data = eiffel()

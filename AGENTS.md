@@ -1,12 +1,12 @@
-# tstudio
+# flowfields
 
-Generative-art library of composable fields (`src/tstudio`), with demos in
+Generative-art library of composable fields (`src/flowfields`), with demos in
 `demos/` and the Genuary 2026 pieces in `artwork/genuary2026/`. Run Python
 with `uv run`. Do not add other artworks to `artwork/`.
 
 ## The JS port
 
-`js/tstudio.js` is a p5.js version of `src/tstudio`, generated with the
+`js/flowfields.js` is a p5.js version of `src/flowfields`, generated with the
 `/port-js` skill (`.claude/skills/port-js/SKILL.md`). Never edit it by hand;
 change the Python and run `/port-js`. Tests: `cd js && npm test`.
 
@@ -15,7 +15,7 @@ change the Python and run `/port-js`. Tests: `cd js && npm test`.
 - Randomness goes through `np.random.Generator`: a class that draws numbers
   takes `rng: np.random.Generator | int | None = None` and stores
   `self.rng = np.random.default_rng(rng)`. Do not use the global
-  `np.random.*` functions in `src/tstudio`.
+  `np.random.*` functions in `src/flowfields`.
 - Fields work on a single 2D point at a time (`__call__(x)` with `x` of
   shape `(2,)`). Avoid numpy broadcasting tricks that have no direct
   translation to `p5.Vector`.

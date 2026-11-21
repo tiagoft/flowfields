@@ -4,7 +4,7 @@ def main():
     """
     Prints a greeting.
     """
-    print("Hello from tstudio!")
+    print("Hello from flowfields!")
 
 
 if __name__ == "__main__":

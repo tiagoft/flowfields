@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import tstudio.vector_fields
-import tstudio.scalar_fields
-import tstudio.utils
+import flowfields.vector_fields
+import flowfields.scalar_fields
+import flowfields.utils
 from tqdm import tqdm
 import cairo
 
@@ -10,32 +10,32 @@ from itertools import product
 
 
 def run():
-    field1 = tstudio.vector_fields.RotationField(
+    field1 = flowfields.vector_fields.RotationField(
         np.array([1, -0.5]),
         direction=1,
     )
-    field2 = tstudio.vector_fields.RotationField(
+    field2 = flowfields.vector_fields.RotationField(
         np.array([-3, 0.5]),
         direction=-1,
     )
 
-    w1 = tstudio.scalar_fields.GaussianField(
+    w1 = flowfields.scalar_fields.GaussianField(
         np.array([1, -0.5]),
         sigma=1,
         scale=3.0,
     )
-    w2 = tstudio.scalar_fields.GaussianField(
+    w2 = flowfields.scalar_fields.GaussianField(
         np.array([-3, 0.5]),
         sigma=1,
         scale=1.0,
     )
 
-    field = tstudio.vector_fields.FieldSum(
+    field = flowfields.vector_fields.FieldSum(
         fields=[field1, field2],
         weights=[w1, w2],
     )
 
-    c1 = tstudio.scalar_fields.GaussianField(np.array([0.7, 1.1]), sigma=2)
+    c1 = flowfields.scalar_fields.GaussianField(np.array([0.7, 1.1]), sigma=2)
     colorization = lambda x : 0.01 + 0.99 * np.tanh(c1(x))
 
     width_cm = 10
@@ -77,9 +77,9 @@ def run():
         for _ in range(n_steps):
             dx = field(x) * step_size
             if rotation_angle != 0:
-                dx = tstudio.utils.rotate_vector(dx, rotation_angle)
+                dx = flowfields.utils.rotate_vector(dx, rotation_angle)
             if quantization_levels is not None:
-                dx = tstudio.utils.quantize_vector(dx, quantization_levels)
+                dx = flowfields.utils.quantize_vector(dx, quantization_levels)
             x_ = x + dx
             ctx.line_to(x_[0], x_[1])
             x = x_

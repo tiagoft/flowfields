@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from tstudio.scalar_fields.base import ScalarField
+from flowfields.scalar_fields.base import ScalarField
 
 
 class BoxField(ScalarField):

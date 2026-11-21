@@ -1,8 +1,8 @@
 from pathlib import Path
 
 import numpy as np
-import tstudio.scalar_fields as sf
-import tstudio.vector_fields as vf
+import flowfields.scalar_fields as sf
+import flowfields.vector_fields as vf
 from _common import EIFFEL_MAX, EIFFEL_MIN, EIFFEL_X, EIFFEL_Y, eiffel, heatmap, panels, save, strokes
 
 brightness = sf.MatrixField(EIFFEL_MIN, EIFFEL_MAX, eiffel("L"), normalize=True)

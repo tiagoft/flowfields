@@ -1,6 +1,6 @@
 import numpy as np
-import tstudio.scalar_fields as sf
-import tstudio.vector_fields as vf
+import flowfields.scalar_fields as sf
+import flowfields.vector_fields as vf
 from _common import panels, save, strokes
 
 # At each point only the field with the highest weight counts, so the plane is

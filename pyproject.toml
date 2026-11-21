@@ -1,5 +1,5 @@
 [project]
-name = "tstudio"
+name = "flowfields"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -27,5 +27,5 @@ build-backend = "setuptools.build_meta"
 where = ["src/"]
 
 #[project.scripts]
-#tstudio = "tstudio.main:main"
-#modulated_functions = "tstudio.modulated_functions:run"
+#flowfields = "flowfields.main:main"
+#modulated_functions = "flowfields.modulated_functions:run"

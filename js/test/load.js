@@ -1,5 +1,5 @@
-// Loads p5.js and tstudio.js inside jsdom, as a browser page would, and
-// returns { p5, tstudio }.
+// Loads p5.js and flowfields.js inside jsdom, as a browser page would, and
+// returns { p5, flowfields }.
 const fs = require("fs");
 const path = require("path");
 const { JSDOM, VirtualConsole } = require("jsdom");
@@ -28,9 +28,9 @@ function load() {
   // p5 2.x installs the argument handling of p5.Vector when the first sketch
   // starts, so an empty sketch is created before using the library.
   const sketch = new dom.window.p5(() => {});
-  const tstudioSource = fs.readFileSync(path.join(__dirname, "..", "tstudio.js"), "utf8");
-  dom.window.eval(tstudioSource);
-  return { p5: dom.window.p5, tstudio: dom.window.tstudio, close: () => { sketch.remove(); dom.window.close(); } };
+  const flowfieldsSource = fs.readFileSync(path.join(__dirname, "..", "flowfields.js"), "utf8");
+  dom.window.eval(flowfieldsSource);
+  return { p5: dom.window.p5, flowfields: dom.window.flowfields, close: () => { sketch.remove(); dom.window.close(); } };
 }
 
 module.exports = { load };

@@ -1,6 +1,6 @@
 import numpy as np
-import tstudio.utils
-import tstudio.vector_fields as vf
+import flowfields.utils
+import flowfields.vector_fields as vf
 from _common import panels, save, strokes
 
 # Single segments of a field whose vectors grow with the distance to the center.
@@ -15,6 +15,6 @@ fig, axes = panels(list(limits))
 for ax, limit in zip(axes, limits.values()):
     transform = None
     if limit is not None:
-        transform = lambda dx: tstudio.utils.clamp_vector(dx, *limit)
+        transform = lambda dx: flowfields.utils.clamp_vector(dx, *limit)
     strokes(ax, field, n_lines=1500, n_steps=1, step=0.2, transform=transform)
 save(fig, __file__)

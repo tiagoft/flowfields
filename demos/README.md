@@ -1,6 +1,6 @@
 # Demos
 
-One small script for each feature of `tstudio`. Each script saves its figure in [`outputs/`](outputs/) with the same name as the script, and the random seed is fixed, so running it again gives the same figure.
+One small script for each feature of `flowfields`. Each script saves its figure in [`outputs/`](outputs/) with the same name as the script, and the random seed is fixed, so running it again gives the same figure.
 
 To run one demo, or all of them:
 
@@ -154,7 +154,7 @@ Unlike `MatrixField`, this field has `y=0` at the **top** of the image, so the d
 
 ## Vector utilities
 
-Functions from `tstudio.utils` that modify a vector. The demos apply them to each step of a line.
+Functions from `flowfields.utils` that modify a vector. The demos apply them to each step of a line.
 
 ### 13 — rotate_vector
 
@@ -193,4 +193,4 @@ A `FieldSum` that contains another `FieldSum` (a spiral), a `FieldMax` and a `No
 ## What has no demo
 
 - `ScalarField`, `FlowField` and `ColorField` are abstract base classes.
-- `normalize_vector`, `clamp`, `lerp`, `cartesian_to_polar` and `polar_to_cartesian` in `tstudio.utils` are small math helpers. `normalize_vector` is what `normalize=True` applies.
+- `normalize_vector`, `clamp`, `lerp`, `cartesian_to_polar` and `polar_to_cartesian` in `flowfields.utils` are small math helpers. `normalize_vector` is what `normalize=True` applies.

@@ -1,7 +1,7 @@
 // The same idea as demos/_common.py strokes(): random starting points that
 // follow the field for a few steps. Field coordinates are [-1, 1]², and
 // toScreen maps them to the canvas (y up, as in the Python demos).
-const { RotationField, ExpansionField, NoiseField, FieldSum, GaussianField, Generator, vec } = tstudio;
+const { RotationField, ExpansionField, NoiseField, FieldSum, GaussianField, Generator, vec } = flowfields;
 
 let field;
 let rng;

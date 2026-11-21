@@ -1,5 +1,5 @@
 import numpy as np
-import tstudio.scalar_fields as sf
+import flowfields.scalar_fields as sf
 from _common import heatmap, panels, save
 
 center = np.array([0.2, -0.1])

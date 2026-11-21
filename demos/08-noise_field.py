@@ -1,5 +1,5 @@
 import numpy as np
-import tstudio.vector_fields as vf
+import flowfields.vector_fields as vf
 from _common import RNG, panels, save, strokes
 
 noise = vf.NoiseField(rng=RNG)

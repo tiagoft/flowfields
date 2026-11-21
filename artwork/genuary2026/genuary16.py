@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import tstudio.vector_fields
-import tstudio.scalar_fields
-import tstudio.utils
+import flowfields.vector_fields
+import flowfields.scalar_fields
+import flowfields.utils
 from tqdm import tqdm
 import cairo
 
@@ -12,54 +12,54 @@ from itertools import product
 def run():
     np.random.seed(42)
     
-    field1 = tstudio.vector_fields.RotationField(
+    field1 = flowfields.vector_fields.RotationField(
         center=np.array([0, 0]),
         direction=1,
         normalize=True,
     )
-    field2 = tstudio.vector_fields.ExpansionField(
+    field2 = flowfields.vector_fields.ExpansionField(
         center=np.array([0, 0]),
         direction=1,
         normalize=True,
     )
-    vortex = tstudio.vector_fields.FieldSum(
+    vortex = flowfields.vector_fields.FieldSum(
         fields=[field1, field2],
         weights=[1.0, 0.25],
     )
     
-    fieldExpansion = tstudio.vector_fields.ExpansionField(
+    fieldExpansion = flowfields.vector_fields.ExpansionField(
         center=np.array([-6, -6]),
         direction=1,
         normalize=True,
     )
-    fieldNoise = tstudio.vector_fields.NoiseField(distribution="uniform")
-    fieldGaussian1 = tstudio.scalar_fields.GaussianField(
+    fieldNoise = flowfields.vector_fields.NoiseField(distribution="uniform")
+    fieldGaussian1 = flowfields.scalar_fields.GaussianField(
         center=np.array([-6, -6]),
         sigma=5.0,
         scale=1.5,
     )
-    fieldGaussian2 = tstudio.scalar_fields.GaussianField(
+    fieldGaussian2 = flowfields.scalar_fields.GaussianField(
         center=np.array([6, 6]),
         sigma=6.0,
         scale=1.0,
     )
-    bgField = tstudio.vector_fields.FieldSum(
+    bgField = flowfields.vector_fields.FieldSum(
         fields=[fieldExpansion, fieldNoise],
         weights=[fieldGaussian1, fieldGaussian2],
     )
     
-    focus = tstudio.scalar_fields.GaussianField(
+    focus = flowfields.scalar_fields.GaussianField(
         center=np.array([0, 0]),
         sigma=3.0,
         scale=2.0,
     )
-    field = tstudio.vector_fields.FieldSum(
+    field = flowfields.vector_fields.FieldSum(
         fields=[vortex, bgField],
-        weights=[focus, tstudio.scalar_fields.ConstantField(1.0)],
+        weights=[focus, flowfields.scalar_fields.ConstantField(1.0)],
     )
     
 
-    c1 = tstudio.scalar_fields.GaussianField(np.array([0.7, 1.1]), sigma=2)
+    c1 = flowfields.scalar_fields.GaussianField(np.array([0.7, 1.1]), sigma=2)
     colorization = lambda x: 0.01 + 0.99 * np.tanh(c1(x))
 
     width_cm = 10
@@ -101,9 +101,9 @@ def run():
         for _ in range(n_steps):
             dx = field(x) * step_size
             if rotation_angle != 0:
-                dx = tstudio.utils.rotate_vector(dx, rotation_angle)
+                dx = flowfields.utils.rotate_vector(dx, rotation_angle)
             if quantization_levels is not None:
-                dx = tstudio.utils.quantize_vector(dx, quantization_levels)
+                dx = flowfields.utils.quantize_vector(dx, quantization_levels)
             x_ = x + dx
             ctx.line_to(x_[0], x_[1])
             x = x_

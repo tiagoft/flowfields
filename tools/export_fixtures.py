@@ -24,9 +24,9 @@ from pathlib import Path
 
 import numpy as np
 
-import tstudio.scalar_fields as sf
-import tstudio.utils as utils
-import tstudio.vector_fields as vf
+import flowfields.scalar_fields as sf
+import flowfields.utils as utils
+import flowfields.vector_fields as vf
 
 OUTPUT = Path(__file__).parent.parent / "js" / "test" / "fixtures.json"
 

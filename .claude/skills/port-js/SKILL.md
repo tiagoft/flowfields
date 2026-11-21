@@ -1,11 +1,11 @@
 ---
 name: port-js
-description: Port changes in the Python library (src/tstudio) to its p5.js version (js/tstudio.js), and check them with fixtures computed in Python. Use when the user runs /port-js or asks to sync, update or port the JS / p5.js version.
+description: Port changes in the Python library (src/flowfields) to its p5.js version (js/flowfields.js), and check them with fixtures computed in Python. Use when the user runs /port-js or asks to sync, update or port the JS / p5.js version.
 ---
 
-# Port src/tstudio to js/tstudio.js
+# Port src/flowfields to js/flowfields.js
 
-The Python code in `src/tstudio` is the source of truth. `js/tstudio.js` is
+The Python code in `src/flowfields` is the source of truth. `js/flowfields.js` is
 generated from it and is never edited by hand. Python and JS must give the
 same numbers for the same inputs, and `js/test/fixtures.json` (made by
 `tools/export_fixtures.py`) is how we check that.
@@ -13,14 +13,14 @@ same numbers for the same inputs, and `js/test/fixtures.json` (made by
 ## Steps
 
 1. **Find what changed.** Read the `source-commit:` line at the top of
-   `js/tstudio.js`, then run
-   `git diff <source-commit> -- src/tstudio` (this includes uncommitted
-   changes) and `git status src/tstudio` for new files. If the diff is
+   `js/flowfields.js`, then run
+   `git diff <source-commit> -- src/flowfields` (this includes uncommitted
+   changes) and `git status src/flowfields` for new files. If the diff is
    empty, say so and stop.
-2. **Port each change** into the section of `js/tstudio.js` that is named
-   after the Python file (`// src/tstudio/vector_fields/sum.py`). A new
+2. **Port each change** into the section of `js/flowfields.js` that is named
+   after the Python file (`// src/flowfields/vector_fields/sum.py`). A new
    Python module gets a new section, in the same order as the `__init__.py`
-   imports, and its names go in the `tstudio` object at the end of the file.
+   imports, and its names go in the `flowfields` object at the end of the file.
    Follow the conventions below.
 3. **Update the fixtures** in `tools/export_fixtures.py`:
    - a new or changed class gets cases in `SCALAR_CASES`, `VECTOR_CASES` or,
@@ -33,9 +33,9 @@ same numbers for the same inputs, and `js/test/fixtures.json` (made by
    `node_modules` is missing). Fix the port until everything passes. Never
    fix a failure by changing the expected values or loosening `TOL` — if
    you think the Python side is wrong, stop and tell the user.
-5. **Update the header** of `js/tstudio.js`: `source-commit:` becomes the
+5. **Update the header** of `js/flowfields.js`: `source-commit:` becomes the
    output of `git rev-parse --short HEAD`, and the "Not ported yet" /
-   "Python-only" lines list what is still missing. If `src/tstudio` has
+   "Python-only" lines list what is still missing. If `src/flowfields` has
    uncommitted changes, add `+uncommitted` after the hash and tell the user
    to commit, then update the hash.
 6. **Report** what was ported, what was left out and why, and the test
@@ -44,8 +44,8 @@ same numbers for the same inputs, and `js/test/fixtures.json` (made by
 ## Conventions
 
 **Structure**
-- One file, `js/tstudio.js`, wrapped in an IIFE that sets the global
-  `tstudio` (for `<script>` tags) and `module.exports` (for node).
+- One file, `js/flowfields.js`, wrapped in an IIFE that sets the global
+  `flowfields` (for `<script>` tags) and `module.exports` (for node).
 - Names: classes keep their Python names; functions, methods, attributes
   and arguments become camelCase (`normalize_vector` → `normalizeVector`,
   `min_corner` → `minCorner`, `list_of_fields` → `listOfFields`).
@@ -86,11 +86,11 @@ same numbers for the same inputs, and `js/test/fixtures.json` (made by
 **Randomness**
 - In Python, a class that draws random numbers takes
   `rng: np.random.Generator | int | None = None` and stores
-  `self.rng = np.random.default_rng(rng)`. Nothing in `src/tstudio` uses the
+  `self.rng = np.random.default_rng(rng)`. Nothing in `src/flowfields` uses the
   global `np.random.*` functions; if a diff adds one, point it out to the
   user instead of porting it.
 - In JS, the same argument is stored as `this.rng = defaultRng(rng)`, and
-  the `Generator` in `tstudio.js` has numpy's method names:
+  the `Generator` in `flowfields.js` has numpy's method names:
   `random()`, `uniform(low, high)`, `normal(loc, scale)`,
   `choice(n, { size, replace, p })`. A draw of `size=x.shape` becomes one
   draw per coordinate. If a port needs a numpy method that `Generator` lacks,

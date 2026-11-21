@@ -1,7 +1,7 @@
 import numpy as np
-import tstudio.scalar_fields as sf
-import tstudio.vector_fields as vf
-from tstudio.color_fields import MatrixColorField
+import flowfields.scalar_fields as sf
+import flowfields.vector_fields as vf
+from flowfields.color_fields import MatrixColorField
 from _common import EIFFEL_MAX, EIFFEL_MIN, EIFFEL_X, EIFFEL_Y, RNG, eiffel, panels, save, strokes
 
 # Fields nest: this tree blends a spiral and a FieldMax, and the image decides

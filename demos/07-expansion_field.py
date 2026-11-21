@@ -1,5 +1,5 @@
 import numpy as np
-import tstudio.vector_fields as vf
+import flowfields.vector_fields as vf
 from _common import arrows, panels, save, strokes
 
 center = np.zeros(2)

@@ -1,6 +1,6 @@
 """Color field that draws colors from the local palette of an image."""
 
-from tstudio.color_fields.base import ColorField
+from flowfields.color_fields.base import ColorField
 import numpy as np
 from sklearn.cluster import KMeans
 

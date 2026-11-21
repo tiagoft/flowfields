@@ -1,6 +1,6 @@
 import numpy as np
-import tstudio.scalar_fields as sf
-import tstudio.vector_fields as vf
+import flowfields.scalar_fields as sf
+import flowfields.vector_fields as vf
 from _common import heatmap, panels, save, strokes
 
 box = sf.BoxField(np.array([-0.5, -0.3]), np.array([0.6, 0.5]))
