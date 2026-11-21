@@ -74,6 +74,24 @@ LICENSE.
 - [ ] Publish to PyPI, and check `pip install flowfields` in a clean
       environment.
 
+## Library
+
+- [ ] A Perlin or simplex noise field: a noise that is coherent in space,
+      unlike `NoiseField`, which draws a new vector at every call. It is
+      the classic flow field.
+- [ ] Plain functions as fields and weights, such as
+      `weights=[lambda x: x[0] ** 2]`, without writing a subclass.
+- [ ] `MatrixField` puts the first row of the matrix at the highest y and
+      `MatrixColorField` at the lowest. Both are documented, but the same
+      image gives flipped results in the two fields.
+- [ ] `MatrixColorField.__call__` takes a `random_state` argument it does not
+      use, and `get_probs` prints before raising on NaN.
+- [ ] `KernelProbabilisticMatrixField.__call__` repeats the bilinear
+      interpolation of `MatrixField` instead of reusing it.
+- [ ] The `MatrixColorField` docstring should say that every color missing
+      from the window counts as one pixel, so a window of a few pixels makes
+      all colors about equally likely.
+
 ## Decided against
 
 - **Tracing lines through a field** (`trace`, starting points, SVG export,
