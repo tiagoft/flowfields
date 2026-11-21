@@ -1,0 +1,84 @@
+name: publish
+
+# Pushing a tag such as v0.2.0 publishes that version to TestPyPI and then to
+# PyPI. The tag must match the version in pyproject.toml. Publishing uses
+# trusted publishing: PyPI and TestPyPI each list this workflow, with the
+# environment named below, as a trusted publisher, so no token is stored.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+
+      - name: The tag matches the version
+        run: |
+          version=$(sed -n 's/^version = "\(.*\)"$/\1/p' pyproject.toml)
+          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "::error::The tag is $GITHUB_REF_NAME, but pyproject.toml has version $version"
+            exit 1
+          fi
+
+      - name: Tests
+        run: uv run --locked --no-group artwork pytest -q
+
+      - name: Build
+        run: uv build
+
+      - name: Check the metadata and the README
+        run: uvx twine check --strict dist/*
+
+      - name: Install the wheel in a clean environment
+        run: |
+          uv venv "$RUNNER_TEMP/check"
+          uv pip install --python "$RUNNER_TEMP/check" dist/*.whl
+          cd "$RUNNER_TEMP"
+          check/bin/python -I -c "import flowfields as ff; assert ff.__version__ == '${GITHUB_REF_NAME#v}', ff.__version__"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  testpypi:
+    name: Publish to TestPyPI
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/flowfields
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  pypi:
+    name: Publish to PyPI
+    needs: testpypi
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/flowfields
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1

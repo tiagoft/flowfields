@@ -55,7 +55,7 @@ LICENSE.
 - [x] Python tests with `pytest`, at least one per field and per helper.
 - [x] A GitHub Action that runs `pytest` on Python 3.10 to 3.13 and
       `npm test` in `js/`.
-- [ ] `uv build`, `uvx twine check dist/*`, then install the wheel in a new
+- [x] `uv build`, `uvx twine check dist/*`, then install the wheel in a new
       virtual environment and run the README example there.
 
 ### Publishing
@@ -64,8 +64,12 @@ LICENSE.
       mark the release.
 - [ ] Create a PyPI account with two-factor authentication, and a TestPyPI
       account.
-- [ ] Set up trusted publishing: a GitHub Action publishes when a `v*` tag
+- [x] Set up trusted publishing: a GitHub Action publishes when a `v*` tag
       is pushed, with no token stored anywhere.
+- [ ] Register the workflow as a trusted publisher, on PyPI and on TestPyPI
+      (for a project that does not exist yet, as a "pending publisher"):
+      owner `tiagoft`, repository `flowfields`, workflow `publish.yml`,
+      environment `pypi` on PyPI and `testpypi` on TestPyPI.
 - [ ] Decide how tags are created: by hand when releasing, or by the version
       hook on every merge. jsDelivr needs the tags to serve a fixed version
       of `flowfields.js`.
