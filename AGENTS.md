@@ -8,7 +8,8 @@ with `uv run`. Do not add other artworks to `artwork/`.
 
 `js/flowfields.js` is a p5.js version of `src/flowfields`, generated with the
 `/port-js` skill (`.claude/skills/port-js/SKILL.md`). Never edit it by hand;
-change the Python and run `/port-js`. Tests: `cd js && npm test`.
+change the Python and run `/port-js`. Tests: `uv run pytest` for Python and
+`cd js && npm test` for the port.
 
 ## Writing Python that ports well
 
