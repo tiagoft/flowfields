@@ -1,9 +1,9 @@
 name: publish
 
-# Pushing a tag such as v0.2.0 publishes that version to TestPyPI and then to
-# PyPI. The tag must match the version in pyproject.toml. Publishing uses
-# trusted publishing: PyPI and TestPyPI each list this workflow, with the
-# environment named below, as a trusted publisher, so no token is stored.
+# Pushing a tag such as v0.2.0 publishes that version to PyPI. The tag must
+# match the version in pyproject.toml. Publishing uses trusted publishing:
+# PyPI lists this workflow, with the environment named below, as a trusted
+# publisher, so no token is stored.
 
 on:
   push:
@@ -49,27 +49,9 @@ jobs:
           name: dist
           path: dist/
 
-  testpypi:
-    name: Publish to TestPyPI
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: testpypi
-      url: https://test.pypi.org/p/flowfields
-    permissions:
-      id-token: write
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist/
-      - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
-
   pypi:
     name: Publish to PyPI
-    needs: testpypi
+    needs: build
     runs-on: ubuntu-latest
     environment:
       name: pypi
