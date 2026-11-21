@@ -74,6 +74,15 @@ LICENSE.
 - [ ] Publish to PyPI, and check `pip install flowfields` in a clean
       environment.
 
+## JS
+
+- [ ] Publish `flowfields` on npm (the name was free on 2026-11-21). The
+      package is ready: `npm pack` gives `flowfields.js`, the README and the
+      LICENSE. Make the links in `js/README.md` absolute first, since npm
+      shows it as the package page.
+- [ ] Publish `js/examples/` on GitHub Pages once the repository is public,
+      so the sketches run in the browser from a link.
+
 ## Library
 
 - [ ] A Perlin or simplex noise field: a noise that is coherent in space,

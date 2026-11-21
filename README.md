@@ -41,7 +41,8 @@ pip install git+https://github.com/tiagoft/flowfields.git
 <script src="https://cdn.jsdelivr.net/gh/tiagoft/flowfields@main/js/flowfields.js"></script>
 ```
 
-Build fields inside `setup()` or later. See the [example sketch](js/examples/flow/sketch.js).
+Build fields inside `setup()` or later. The [JS README](js/README.md) shows how
+the Python API maps to JS, and [`js/examples/`](js/examples/) has sketches.
 
 ### Running the demos
 
