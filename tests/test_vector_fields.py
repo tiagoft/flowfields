@@ -176,31 +176,35 @@ class TestFieldSelect:
         f = ff.FieldSelect([rot, exp], change_id_prob=0.0, lerp_len=4, normalize=False, rng=0)
         # Start on the rotation, force a switch to the expansion and follow
         # the transition
+        f.last_idx = [0]
         f.current_field = ff.FieldSum(fields=[rot])
         f.next_field = ff.FieldSum(fields=[exp])
         x = p(1.0, 0.0)
         steps = [f(x) for _ in range(6)]
         for t, v in zip([0.0, 0.25, 0.5, 0.75], steps):
             assert v == pytest.approx((1 - t) * rot(x) + t * exp(x))
+        # the transition ends on the new field, with no step back to the old one
+        assert steps[4] == pytest.approx(exp(x))
         assert steps[5] == pytest.approx(exp(x))
 
-    @pytest.mark.xfail(strict=True, reason=(
-        "Bug: the call that ends a transition makes the new field current but "
-        "returns the old field's vector, so lines kink at every switch"))
-    def test_transition_ends_on_the_new_field(self):
+    def test_without_lerp_the_switch_is_immediate(self):
         rot, exp = ff.RotationField(p(0, 0)), ff.ExpansionField(p(0, 0))
-        f = ff.FieldSelect([rot, exp], change_id_prob=0.0, lerp_len=4, normalize=False, rng=0)
+        f = ff.FieldSelect([rot, exp], change_id_prob=0.0, normalize=False, rng=0)
+        f.last_idx = [0]
         f.current_field = ff.FieldSum(fields=[rot])
         f.next_field = ff.FieldSum(fields=[exp])
         x = p(1.0, 0.0)
-        steps = [f(x) for _ in range(5)]
-        assert steps[4] == pytest.approx(exp(x))
+        assert f(x) == pytest.approx(exp(x))
 
-    @pytest.mark.xfail(strict=True, reason=(
-        "Bug: the first selection, in __init__, ignores the weights, so a field "
-        "with weight 0 can start active and give [0, 0] until the first switch"))
     def test_zero_weight_field_is_not_active_at_the_start(self):
         rot, exp = ff.RotationField(p(0, 0)), ff.ExpansionField(p(0, 0))
         for seed in range(10):
             f = ff.FieldSelect([rot, exp], weights=[1.0, 0.0], change_id_prob=0.0, rng=seed)
             assert f(p(1.0, 0.0)) == pytest.approx(rot(p(1.0, 0.0)))
+
+    def test_first_selection_uses_the_weights_at_the_first_point(self):
+        weights = [ff.GaussianField(p(-1, 0), sigma=0.3), ff.GaussianField(p(1, 0), sigma=0.3)]
+        for seed in range(10):
+            f = ff.FieldSelect([ROT, EXP], weights=weights, change_id_prob=0.0, rng=seed)
+            f(p(1, 0.1))  # far from the first Gaussian: its weight is ~1e-10
+            assert f.last_idx == [1]
