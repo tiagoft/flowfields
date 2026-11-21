@@ -51,7 +51,7 @@ LICENSE.
 
 ### Checks
 
-- [ ] Python tests with `pytest`, at least one per field and per helper.
+- [x] Python tests with `pytest`, at least one per field and per helper.
 - [ ] A GitHub Action that runs `pytest` on Python 3.10 to 3.13 and
       `npm test` in `js/`.
 - [ ] `uv build`, `uvx twine check dist/*`, then install the wheel in a new
