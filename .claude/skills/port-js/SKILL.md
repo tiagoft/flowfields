@@ -55,7 +55,11 @@ same numbers for the same inputs, and `js/test/fixtures.json` (made by
   in camelCase, and the same defaults:
   `def __init__(self, center, direction=1)` →
   `constructor({ center, direction = 1 })`. Arguments without a default
-  stay without one. Drop `**kwargs`.
+  stay without one.
+- Python's `**kwargs` + `warn_unused_arguments(self, kwargs)` becomes
+  `...rest` at the end of the options and `warnUnusedArguments(this, rest)`
+  right after `super()`. Every field constructor has it, so unknown options
+  warn in both languages.
 - `isinstance(w, ScalarField)` → `w instanceof ScalarField`.
 - `raise ValueError(msg)` → `throw new Error(msg)`.
 - Keep the Python docstring's formula as a one-line JSDoc comment; do not
