@@ -52,11 +52,11 @@ function draw() {
 The library gives the fields; following them, as this sketch does with
 lines, is up to you.
 
-More in [`examples/`](examples/):
+More in [`examples/`](https://github.com/tiagoft/flowfields/tree/main/js/examples):
 
-- [`flow`](examples/flow/): lines through a sum of fields with Gaussian
+- [`flow`](https://github.com/tiagoft/flowfields/tree/main/js/examples/flow): lines through a sum of fields with Gaussian
   weights.
-- [`colors`](examples/colors/): lines colored from an image with
+- [`colors`](https://github.com/tiagoft/flowfields/tree/main/js/examples/colors): lines colored from an image with
   `MatrixColorField`.
 
 The examples load files, so open them through a local server, such as
