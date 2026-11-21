@@ -3,9 +3,9 @@
 // GENERATED from src/flowfields by the port-js skill (.claude/skills/port-js).
 // Do not edit by hand: change the Python code and run /port-js again.
 //
-// source-commit: 01617e9
+// source-commit: 3c95674
 //
-// Not ported yet:     FieldSelect, MatrixColorField
+// Not ported yet:     FieldSelect
 // Python-only:        utils.open_image (use imageToMatrix), MatrixField.plot_figure
 //
 // Usage: load p5.js, then this file, and build fields inside setup() or later
@@ -95,6 +95,15 @@
       return loc + scale * r * Math.cos(2 * Math.PI * v);
     }
 
+    /** Integer in [low, high), or in [0, low) when high is omitted, like numpy. */
+    integers(low, high) {
+      if (high === undefined || high === null) {
+        high = low;
+        low = 0;
+      }
+      return low + Math.floor(this.random() * (high - low));
+    }
+
     /**
      * Draws integers from range(n), like numpy's choice(n, size, replace, p).
      * Returns one integer when size is undefined, otherwise an array.
@@ -136,6 +145,96 @@
   // ---------------------------------------------------------------------------
   // src/flowfields/utils.py
   // ---------------------------------------------------------------------------
+
+  function _sqDist(a, b) {
+    let s = 0;
+    for (let d = 0; d < a.length; d++) {
+      const t = a[d] - b[d];
+      s += t * t;
+    }
+    return s;
+  }
+
+  /** Index of the nearest center to each point; ties go to the first one. */
+  function _nearestCenter(data, centers) {
+    return data.map((point) => {
+      let best = Infinity;
+      let label = 0;
+      centers.forEach((center, k) => {
+        const d = _sqDist(point, center);
+        if (d < best) {
+          best = d;
+          label = k;
+        }
+      });
+      return label;
+    });
+  }
+
+  /**
+   * k-means++ initialization, then Lloyd's algorithm. data is an array of
+   * points (arrays of numbers). Returns [centers, labels].
+   */
+  function kmeans(data, nClusters, rng = null, maxIter = 100, tol = 1e-4) {
+    rng = defaultRng(rng);
+    const nPoints = data.length;
+    if (!(nClusters >= 1 && nClusters <= nPoints)) {
+      throw new Error(`n_clusters must be between 1 and ${nPoints}, got ${nClusters}`);
+    }
+    const nDims = data[0].length;
+
+    // k-means++ initialization
+    const centers = [data[rng.integers(nPoints)].slice()];
+    const distances = data.map((point) => _sqDist(point, centers[0]));
+    for (let k = 1; k < nClusters; k++) {
+      const total = distances.reduce((a, b) => a + b, 0);
+      let idx;
+      if (total > 0) {
+        idx = rng.choice(nPoints, { p: distances.map((d) => d / total) });
+      } else { // every point is already on a center
+        idx = rng.integers(nPoints);
+      }
+      centers.push(data[idx].slice());
+      data.forEach((point, i) => {
+        distances[i] = Math.min(distances[i], _sqDist(point, centers[k]));
+      });
+    }
+
+    // Lloyd's algorithm
+    let meanVar = 0;
+    for (let d = 0; d < nDims; d++) {
+      let m = 0;
+      for (const point of data) m += point[d];
+      m /= nPoints;
+      let v = 0;
+      for (const point of data) v += (point[d] - m) ** 2;
+      meanVar += v / nPoints;
+    }
+    const threshold = tol * (meanVar / nDims);
+    let labels = _nearestCenter(data, centers);
+    for (let iter = 0; iter < maxIter; iter++) {
+      const sums = centers.map(() => new Array(nDims).fill(0));
+      const counts = new Array(nClusters).fill(0);
+      data.forEach((point, i) => {
+        counts[labels[i]] += 1;
+        for (let d = 0; d < nDims; d++) sums[labels[i]][d] += point[d];
+      });
+      let moved = 0.0;
+      for (let k = 0; k < nClusters; k++) {
+        if (counts[k] > 0) {
+          const newCenter = sums[k].map((s) => s / counts[k]);
+          moved += _sqDist(newCenter, centers[k]);
+          centers[k] = newCenter;
+        }
+      }
+      const newLabels = _nearestCenter(data, centers);
+      if (newLabels.every((l, i) => l === labels[i])) break;
+      labels = newLabels;
+      if (moved <= threshold) break;
+    }
+
+    return [centers, labels];
+  }
 
   /** Normalize a vector. A zero vector is returned unchanged. */
   function normalizeVector(v) {
@@ -482,6 +581,103 @@
   }
 
   // ---------------------------------------------------------------------------
+  // src/flowfields/color_fields/base.py
+  // ---------------------------------------------------------------------------
+
+  /** Abstract base: at(x) returns an [r, g, b] color. */
+  class ColorField {
+    at(x) {
+      throw new Error("ColorField is an abstract class and cannot be called directly.");
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // src/flowfields/color_fields/matrixcolorfield.py
+  // ---------------------------------------------------------------------------
+
+  /**
+   * p_k(x) ∝ exp(z_k(x) / temperature), z_k(x) = fraction of the window's
+   * pixels in palette color k. data is an array of rows of [r, g, b], as from
+   * imageToMatrix(img, "RGB"); the first row is at the lowest y.
+   */
+  class MatrixColorField extends ColorField {
+    constructor({
+      minCorner, maxCorner, data, nColors, randomState = 0, kernelSize = 0.05,
+      temperature = 1.0, rng,
+    }) {
+      super();
+      this.minCorner = asVector(minCorner);
+      this.maxCorner = asVector(maxCorner);
+      this.data = data;
+      this.nColors = nColors;
+      this.randomState = randomState;
+      this.kernelSize = kernelSize;
+      this.temperature = temperature;
+      this.rng = defaultRng(rng);
+
+      // The palette: the nColors centers of the image's pixels, and the
+      // palette color of every pixel
+      const h = data.length;
+      const w = data[0].length;
+      const [palette, labels] = kmeans(data.flat(), nColors, this.randomState);
+      this.palette = palette;
+
+      // One integral image (2D prefix sum) per palette color, so windowed
+      // pixel counts can be looked up in O(1) on every getProbs call.
+      this._h = h;
+      this._w = w;
+      this.integralImages = [];
+      for (let k = 0; k < nColors; k++) {
+        const ii = new Int32Array((h + 1) * (w + 1));
+        for (let r = 0; r < h; r++) {
+          let rowSum = 0;
+          for (let c = 0; c < w; c++) {
+            rowSum += labels[r * w + c] === k ? 1 : 0;
+            ii[(r + 1) * (w + 1) + (c + 1)] = ii[r * (w + 1) + (c + 1)] + rowSum;
+          }
+        }
+        this.integralImages.push(ii);
+      }
+    }
+
+    /** Probability of each palette color at x; points outside use the nearest point inside. */
+    getProbs(x) {
+      const tx = clamp((x.x - this.minCorner.x) / (this.maxCorner.x - this.minCorner.x), 0.0, 1.0);
+      const ty = clamp((x.y - this.minCorner.y) / (this.maxCorner.y - this.minCorner.y), 0.0, 1.0);
+
+      const h = this._h, w = this._w;
+      const centerX = Math.trunc(tx * (w - 1));
+      const centerY = Math.trunc(ty * (h - 1));
+      const halfK = Math.trunc(this.kernelSize * Math.max(w, h) / 2);
+      const xMin = Math.max(centerX - halfK, 0);
+      const xMax = Math.min(centerX + halfK + 1, w);
+      const yMin = Math.max(centerY - halfK, 0);
+      const yMax = Math.min(centerY + halfK + 1, h);
+
+      const at = (ii, r, c) => ii[r * (w + 1) + c];
+      let z = this.integralImages.map((ii) =>
+        at(ii, yMax, xMax) - at(ii, yMin, xMax) - at(ii, yMax, xMin) + at(ii, yMin, xMin));
+      z = z.map((v) => Math.max(v, 1));
+      const zSum = z.reduce((a, b) => a + b, 0);
+      z = z.map((v) => v / zSum);
+      const logits = z.map((v) => v / this.temperature);
+      const maxLogit = Math.max(...logits);
+      let probs = logits.map((v) => Math.exp(v - maxLogit));
+      const pSum = probs.reduce((a, b) => a + b, 0);
+      probs = probs.map((v) => v / pSum);
+      if (probs.some(Number.isNaN)) throw new Error("NaN values found in probabilities.");
+      return probs;
+    }
+
+    /** Draws a palette color for x and returns it as [r, g, b]. */
+    at(x) {
+      const probs = this.getProbs(x);
+      const sample = this.rng.choice(this.nColors, { p: probs });
+      return this.palette[sample].slice();
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // p5 extras (no Python counterpart)
   // ---------------------------------------------------------------------------
 
@@ -518,12 +714,14 @@
     Generator, defaultRng,
     // utils
     normalizeVector, clampVector, lerp, clamp, cartesianToPolar,
-    polarToCartesian, rotateVector, quantizeVector,
+    polarToCartesian, rotateVector, quantizeVector, kmeans,
     // scalar fields
     ScalarField, ConstantField, GaussianField, BoxField, MatrixField,
     KernelProbabilisticMatrixField,
     // vector fields
     FlowField, RotationField, ExpansionField, NoiseField, FieldSum, FieldMax,
+    // color fields
+    ColorField, MatrixColorField,
     // p5 extras
     vec, asVector, imageToMatrix,
   };

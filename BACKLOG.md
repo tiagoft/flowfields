@@ -45,10 +45,9 @@ LICENSE.
 - [x] `classifiers`: development status, Python versions,
       `Topic :: Artistic Software`, `Topic :: Multimedia :: Graphics`. No
       license classifier: `license = "AGPL-3.0-or-later"` replaces it.
-- [ ] Decide whether `scikit-learn` (only `MatrixColorField`) and
-      `matplotlib` (only `MatrixField.plot_figure`) become optional extras,
-      such as `flowfields[color]`. Then their imports move inside the code
-      that uses them, with an error message that names the extra.
+- [x] `scikit-learn` is gone: `flowfields.utils.kmeans` replaces it.
+- [ ] Decide whether `matplotlib` (only `MatrixField.plot_figure`) becomes an
+      optional extra. Its import is already inside `plot_figure`.
 
 ### Checks
 
