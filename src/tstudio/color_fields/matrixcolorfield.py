@@ -25,12 +25,14 @@ class MatrixColorField(ColorField):
         data: Array of RGB colors with shape (H, W, 3).
         n_colors: Size of the palette.
         random_state: Seed for k-means.  It does not affect the color draws,
-            which use the global NumPy random state.
+            which use ``rng``.
         kernel_size: Side of the window, as a fraction of the largest side of
             the matrix.
         temperature: Lower values favour the most common color in the window,
             and higher values approach a uniform draw from the whole palette,
             including colors that are absent from the window.
+        rng: Random generator for the color draws, or a seed for one.
+            ``None`` takes a fresh seed from the operating system.
     """
 
     def __init__(
@@ -42,6 +44,7 @@ class MatrixColorField(ColorField):
         random_state: int = 0,
         kernel_size: float = 0.05,
         temperature: float = 1.0,
+        rng: np.random.Generator | int | None = None,
     ):
         super().__init__()
         self.min_corner = min_corner
@@ -51,6 +54,7 @@ class MatrixColorField(ColorField):
         self.random_state = random_state
         self.kernel_size = kernel_size
         self.temperature = temperature
+        self.rng = np.random.default_rng(rng)
 
         # Perform k-means clustering to find the n_colors most representative colors
         self.kmeans = KMeans(
@@ -127,5 +131,5 @@ class MatrixColorField(ColorField):
         The ``random_state`` argument is not used.
         """
         probs = self.get_probs(x)
-        sample = np.random.choice(list(range(self.n_colors)), p=probs.flatten())
+        sample = self.rng.choice(self.n_colors, p=probs.flatten())
         return self.kmeans.cluster_centers_[sample]

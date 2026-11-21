@@ -18,7 +18,9 @@ EIFFEL_Y = (0, 1)
 EIFFEL_MIN = np.array([EIFFEL_X[0], EIFFEL_Y[0]])
 EIFFEL_MAX = np.array([EIFFEL_X[1], EIFFEL_Y[1]])
 
-np.random.seed(0)
+# Every random draw in the demos comes from this generator, so the figures
+# are the same each time a demo runs.
+RNG = np.random.default_rng(0)
 
 
 def eiffel(mode="RGB"):
@@ -88,7 +90,7 @@ def strokes(
     colors = []
     for _ in range(n_lines):
         if start is None:
-            x = np.array([np.random.uniform(*xlim), np.random.uniform(*ylim)])
+            x = np.array([RNG.uniform(*xlim), RNG.uniform(*ylim)])
         else:
             x = np.array(start, dtype=float)
         c = color(x) if callable(color) else color

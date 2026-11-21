@@ -27,6 +27,8 @@ class NoiseField(FlowField):
         normalize: Whether to L2-normalise the output vector.
         distribution: Distribution of each coordinate, either ``"gaussian"`` or
             ``"uniform"``.
+        rng: Random generator, or a seed for one.  ``None`` takes a fresh
+            seed from the operating system.
         **kwargs: Ignored.
     """
 
@@ -34,6 +36,7 @@ class NoiseField(FlowField):
         self,
         normalize: bool = True,
         distribution: str = "gaussian",
+        rng: np.random.Generator | int | None = None,
         **kwargs,
     ):
         super().__init__()
@@ -41,15 +44,16 @@ class NoiseField(FlowField):
             raise ValueError(f"Unknown distribution: {distribution}")
         self.normalize = normalize
         self.distribution = distribution
+        self.rng = np.random.default_rng(rng)
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
         """
         Returns a new random vector with the same shape as x.
         """
         if self.distribution == "gaussian":
-            noise = np.random.normal(size=x.shape)
+            noise = self.rng.normal(size=x.shape)
         else:
-            noise = np.random.uniform(low=-1.0, high=1.0, size=x.shape)
+            noise = self.rng.uniform(low=-1.0, high=1.0, size=x.shape)
         if self.normalize:
             noise = normalize_vector(noise)
         return noise

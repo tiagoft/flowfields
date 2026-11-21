@@ -50,6 +50,8 @@ class FieldSelect(FlowField):
             of vectors interpolated during a transition.
         lerp_len: Number of steps over which to interpolate between field
             transitions.  0 = instantaneous switch.
+        rng: Random generator, or a seed for one.  ``None`` takes a fresh
+            seed from the operating system.
     """
 
     def __init__(
@@ -61,6 +63,7 @@ class FieldSelect(FlowField):
         temperature: float = 0.0,
         normalize: bool = True,
         lerp_len: int = 0,
+        rng: np.random.Generator | int | None = None,
     ):
         self.list_of_fields = fields
         self.weights = weights
@@ -70,6 +73,7 @@ class FieldSelect(FlowField):
         self.temperature = temperature
         self.lerp_len = lerp_len
         self.lerp_count = 0
+        self.rng = np.random.default_rng(rng)
 
         self.last_idx = self.select_index().tolist()
         fields = [self.list_of_fields[i] for i in self.last_idx]
@@ -115,7 +119,7 @@ class FieldSelect(FlowField):
             p = p**(1.0 / (1.0 + self.temperature))
             p = p / np.sum(p)
 
-        idx = np.random.choice(
+        idx = self.rng.choice(
             len(self.list_of_fields),
             p=p,
             # Fields with zero probability are never drawn, even if that means
@@ -133,7 +137,7 @@ class FieldSelect(FlowField):
         Returns the flowfield vector at point x.
         """
         if (self.last_idx is None\
-                or np.random.rand() < self.change_id_prob)\
+                or self.rng.random() < self.change_id_prob)\
                 and self.lerp_count == 0:
             self.last_idx = self.select_index(x).tolist()
             fields = [self.list_of_fields[i] for i in self.last_idx]

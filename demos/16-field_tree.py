@@ -2,7 +2,7 @@ import numpy as np
 import tstudio.scalar_fields as sf
 import tstudio.vector_fields as vf
 from tstudio.color_fields import MatrixColorField
-from _common import EIFFEL_MAX, EIFFEL_MIN, EIFFEL_X, EIFFEL_Y, eiffel, panels, save, strokes
+from _common import EIFFEL_MAX, EIFFEL_MIN, EIFFEL_X, EIFFEL_Y, RNG, eiffel, panels, save, strokes
 
 # Fields nest: this tree blends a spiral and a FieldMax, and the image decides
 # where each branch counts. The same image gives the colors.
@@ -16,7 +16,7 @@ regions = vf.FieldMax(
     weights=[sf.GaussianField(np.array([0.3, 0.7]), sigma=0.4), sf.GaussianField(np.array([1.2, 0.2]), sigma=0.4)],
 )
 field = vf.FieldSum(
-    fields=[spiral, regions, vf.NoiseField()],
+    fields=[spiral, regions, vf.NoiseField(rng=RNG)],
     weights=[
         sf.MatrixField(EIFFEL_MIN, EIFFEL_MAX, eiffel("L"), normalize=True),
         sf.ConstantField(0.5),
@@ -24,7 +24,7 @@ field = vf.FieldSum(
     ],
 )
 
-color_field = MatrixColorField(EIFFEL_MIN, EIFFEL_MAX, eiffel(), n_colors=16, temperature=0.05)
+color_field = MatrixColorField(EIFFEL_MIN, EIFFEL_MAX, eiffel(), n_colors=16, temperature=0.05, rng=RNG)
 # MatrixColorField has y=0 at the top of the image, so y is flipped here.
 color = lambda x: color_field(np.array([x[0], EIFFEL_MAX[1] - x[1]]))
 
