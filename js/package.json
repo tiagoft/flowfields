@@ -1,10 +1,36 @@
 {
   "name": "flowfields",
-  "private": true,
+  "version": "0.1.20",
+  "description": "Composable flow fields for generative art, for p5.js",
   "license": "AGPL-3.0-or-later",
-  "description": "p5.js port of flowfields, generated from src/flowfields by the port-js skill",
+  "author": "Tiago Tavares (https://tiagoft.github.io)",
+  "homepage": "https://github.com/tiagoft/flowfields/tree/main/js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tiagoft/flowfields.git",
+    "directory": "js"
+  },
+  "bugs": "https://github.com/tiagoft/flowfields/issues",
+  "keywords": [
+    "generative art",
+    "flow field",
+    "vector field",
+    "creative coding",
+    "p5.js",
+    "p5"
+  ],
+  "main": "flowfields.js",
+  "jsdelivr": "flowfields.js",
+  "unpkg": "flowfields.js",
+  "files": [
+    "flowfields.js"
+  ],
+  "peerDependencies": {
+    "p5": ">=2.0.0"
+  },
   "scripts": {
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.js",
+    "prepack": "node -e \"require('fs').copyFileSync('../LICENSE', 'LICENSE')\""
   },
   "devDependencies": {
     "jsdom": "26.1.0",

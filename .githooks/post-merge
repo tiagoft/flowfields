@@ -10,7 +10,7 @@
 branch=$(git symbolic-ref --quiet --short HEAD) || exit 0
 [ "$branch" = main ] || exit 0
 git rev-parse --quiet --verify HEAD^2 >/dev/null || exit 0
-git diff --cached --quiet -- pyproject.toml uv.lock && exit 0
+git diff --cached --quiet -- pyproject.toml uv.lock js/package.json js/package-lock.json && exit 0
 
 tree=$(git write-tree) || exit 1
 parents=$(git rev-parse HEAD^@ | sed 's/^/-p /')

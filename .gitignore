@@ -23,3 +23,4 @@ js/node_modules/
 # Coverage reports
 .coverage
 coverage.json
+js/LICENSE

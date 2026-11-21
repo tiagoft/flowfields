@@ -7,11 +7,15 @@
 branch=$(git symbolic-ref --quiet --short HEAD) || exit 0
 [ "$branch" = main ] || exit 0
 
-if ! git diff --quiet -- pyproject.toml uv.lock; then
-    echo "bump-on-main: pyproject.toml or uv.lock has unstaged changes;" >&2
+FILES="pyproject.toml uv.lock js/package.json js/package-lock.json"
+
+# shellcheck disable=SC2086  # FILES is a list of paths
+if ! git diff --quiet -- $FILES; then
+    echo "bump-on-main: one of $FILES has unstaged changes;" >&2
     echo "stage or discard them before committing on main." >&2
     exit 1
 fi
 
 python3 tools/bump_version.py || exit 1
-git add pyproject.toml uv.lock
+# shellcheck disable=SC2086
+git add $FILES
