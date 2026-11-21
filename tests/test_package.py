@@ -1,3 +1,4 @@
+import json
 import re
 from importlib.metadata import version
 from pathlib import Path
@@ -24,3 +25,12 @@ def test_version_matches_pyproject():
     pyproject = Path(__file__).parent.parent / "pyproject.toml"
     match = re.search(r'^version = "(.+)"$', pyproject.read_text(), re.MULTILINE)
     assert ff.__version__ == match.group(1)
+
+
+def test_npm_package_has_the_same_version():
+    root = Path(__file__).parent.parent
+    pyproject = re.search(r'^version = "(.+)"$', (root / "pyproject.toml").read_text(), re.MULTILINE)
+    package = json.loads((root / "js" / "package.json").read_text())
+    lock = json.loads((root / "js" / "package-lock.json").read_text())
+    assert package["version"] == pyproject.group(1)
+    assert lock["version"] == lock["packages"][""]["version"] == pyproject.group(1)

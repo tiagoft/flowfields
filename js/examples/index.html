@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>flowfields examples</title>
+    <style>
+      :root { color-scheme: light dark; --bg: #f5f2eb; --fg: #1d2a3a; --muted: #5b6470; --line: #d8d2c4; }
+      @media (prefers-color-scheme: dark) { :root { --bg: #14181d; --fg: #e8e4da; --muted: #9aa3ad; --line: #2c333b; } }
+      body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.5 system-ui, sans-serif; }
+      main { max-width: 40rem; margin: 0 auto; padding: 3rem 1rem; }
+      h1 { margin: 0 0 0.25rem; font-size: 1.6rem; }
+      p { color: var(--muted); margin: 0 0 2rem; }
+      a { color: inherit; }
+      ul { list-style: none; padding: 0; margin: 0; }
+      li { border-top: 1px solid var(--line); padding: 1rem 0; }
+      li a { font-weight: 600; text-decoration: none; }
+      li a:hover { text-decoration: underline; }
+      li span { display: block; color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>flowfields examples</h1>
+      <p>p5.js sketches that use <a href="https://github.com/tiagoft/flowfields/tree/main/js">flowfields.js</a>.</p>
+      <ul>
+        <li>
+          <a href="flow/">flow</a>
+          <span>Lines through a sum of a rotation, an expansion and noise, with Gaussian weights.</span>
+        </li>
+        <li>
+          <a href="colors/">colors</a>
+          <span>Lines colored from an image with MatrixColorField.</span>
+        </li>
+      </ul>
+    </main>
+  </body>
+</html>
