@@ -3,7 +3,7 @@
 // GENERATED from src/flowfields by the port-js skill (.claude/skills/port-js).
 // Do not edit by hand: change the Python code and run /port-js again.
 //
-// source-commit: 3c95674
+// source-commit: 0cdd4c8
 //
 // Not ported yet:     FieldSelect
 // Python-only:        utils.open_image (use imageToMatrix), MatrixField.plot_figure
@@ -145,6 +145,30 @@
   // ---------------------------------------------------------------------------
   // src/flowfields/utils.py
   // ---------------------------------------------------------------------------
+
+  /**
+   * A field was given options it does not use. Fields accept and ignore
+   * unknown options, so one field type can replace another; this warning
+   * catches typos. Silence it with flowfields.warnings.unusedArguments = false.
+   */
+  class UnusedArgumentWarning extends Error {
+    constructor(message) {
+      super(message);
+      this.name = "UnusedArgumentWarning";
+    }
+  }
+
+  /** Settings for the warnings of the library. */
+  const warningSettings = { unusedArguments: true };
+
+  /** Warns, with the call stack, that a field ignores the options in rest. */
+  function warnUnusedArguments(field, rest) {
+    const names = Object.keys(rest || {});
+    if (names.length === 0 || !warningSettings.unusedArguments) return;
+    const plural = names.length > 1 ? "s" : "";
+    const list = names.map((n) => `'${n}'`).join(", ");
+    console.warn(new UnusedArgumentWarning(`${field.constructor.name} ignores the argument${plural} ${list}`));
+  }
 
   function _sqDist(a, b) {
     let s = 0;
@@ -294,6 +318,10 @@
 
   /** Abstract base class for scalar fields. Subclasses implement at(x). */
   class ScalarField {
+    constructor(options = {}) {
+      warnUnusedArguments(this, options);
+    }
+
     at(x) {
       throw new Error("Subclasses should implement this method.");
     }
@@ -305,8 +333,9 @@
 
   /** f(x) = value */
   class ConstantField extends ScalarField {
-    constructor({ value = 1.0 } = {}) {
+    constructor({ value = 1.0, ...rest } = {}) {
       super();
+      warnUnusedArguments(this, rest);
       this.value = value;
     }
 
@@ -321,8 +350,9 @@
 
   /** f(x) = scale * exp(-||x - center||^2 / (2 * sigma^2)) */
   class GaussianField extends ScalarField {
-    constructor({ center, sigma = 1.0, scale = 1.0 }) {
+    constructor({ center, sigma = 1.0, scale = 1.0, ...rest }) {
       super();
+      warnUnusedArguments(this, rest);
       this.center = asVector(center);
       this.sigma = sigma;
       this.scale = scale;
@@ -340,8 +370,9 @@
 
   /** insideValue inside the box (borders included), outsideValue elsewhere. */
   class BoxField extends ScalarField {
-    constructor({ minCorner, maxCorner, insideValue = 1.0, outsideValue = 0.0 }) {
+    constructor({ minCorner, maxCorner, insideValue = 1.0, outsideValue = 0.0, ...rest }) {
       super();
+      warnUnusedArguments(this, rest);
       const a = asVector(minCorner);
       const b = asVector(maxCorner);
       this.minCorner = vec(Math.min(a.x, b.x), Math.min(a.y, b.y));
@@ -370,8 +401,9 @@
    * row is at the top of the box (highest y). The field is 0 outside the box.
    */
   class MatrixField extends ScalarField {
-    constructor({ minCorner, maxCorner, data, normalize = false }) {
+    constructor({ minCorner, maxCorner, data, normalize = false, ...rest }) {
       super();
+      warnUnusedArguments(this, rest);
       const a = asVector(minCorner);
       const b = asVector(maxCorner);
       this.minCorner = vec(Math.min(a.x, b.x), Math.min(a.y, b.y));
@@ -425,8 +457,9 @@
 
   /** A MatrixField multiplied by a Gaussian centred on its box. */
   class KernelProbabilisticMatrixField extends MatrixField {
-    constructor({ minCorner, maxCorner, data, normalize = false, sigma = 1.0 }) {
+    constructor({ minCorner, maxCorner, data, normalize = false, sigma = 1.0, ...rest }) {
       super({ minCorner, maxCorner, data, normalize });
+      warnUnusedArguments(this, rest);
       this.sigma = sigma;
     }
 
@@ -447,6 +480,10 @@
 
   /** Abstract base class for 2D vector fields. Subclasses implement at(x). */
   class FlowField {
+    constructor(options = {}) {
+      warnUnusedArguments(this, options);
+    }
+
     at(x) {
       throw new Error("Subclasses should implement this method.");
     }
@@ -463,8 +500,9 @@
 
   /** v(x) = direction * [-r_y, r_x], r = x - center */
   class RotationField extends FlowField {
-    constructor({ center, direction = 1, normalize = true }) {
+    constructor({ center, direction = 1, normalize = true, ...rest }) {
       super();
+      warnUnusedArguments(this, rest);
       this.center = asVector(center);
       this.direction = direction;
       this.normalize = normalize;
@@ -484,8 +522,9 @@
 
   /** v(x) = direction * (x - center) */
   class ExpansionField extends FlowField {
-    constructor({ center, direction = 1, normalize = true }) {
+    constructor({ center, direction = 1, normalize = true, ...rest }) {
       super();
+      warnUnusedArguments(this, rest);
       this.center = asVector(center);
       this.direction = direction;
       this.normalize = normalize;
@@ -504,8 +543,9 @@
 
   /** A fresh random vector at every call, regardless of x. */
   class NoiseField extends FlowField {
-    constructor({ normalize = true, distribution = "gaussian", rng } = {}) {
+    constructor({ normalize = true, distribution = "gaussian", rng, ...rest } = {}) {
       super();
+      warnUnusedArguments(this, rest);
       if (distribution !== "gaussian" && distribution !== "uniform") {
         throw new Error(`Unknown distribution: ${distribution}`);
       }
@@ -532,8 +572,9 @@
 
   /** v(x) = sum_i w_i(x) * F_i(x) */
   class FieldSum extends FlowField {
-    constructor({ fields, weights = null, normalize = true }) {
+    constructor({ fields, weights = null, normalize = true, ...rest }) {
       super();
+      warnUnusedArguments(this, rest);
       this.listOfFields = fields;
       this.weights = weights;
       this.normalize = normalize;
@@ -557,8 +598,9 @@
 
   /** v(x) = F_i*(x), i* = argmax_i w_i(x) (first one on ties) */
   class FieldMax extends FlowField {
-    constructor({ fields, weights = null, normalize = true }) {
+    constructor({ fields, weights = null, normalize = true, ...rest }) {
       super();
+      warnUnusedArguments(this, rest);
       this.listOfFields = fields;
       this.weights = weights;
       this.normalize = normalize;
@@ -586,6 +628,10 @@
 
   /** Abstract base: at(x) returns an [r, g, b] color. */
   class ColorField {
+    constructor(options = {}) {
+      warnUnusedArguments(this, options);
+    }
+
     at(x) {
       throw new Error("ColorField is an abstract class and cannot be called directly.");
     }
@@ -604,8 +650,10 @@
     constructor({
       minCorner, maxCorner, data, nColors, randomState = 0, kernelSize = 0.05,
       temperature = 1.0, rng,
+      ...rest
     }) {
       super();
+      warnUnusedArguments(this, rest);
       this.minCorner = asVector(minCorner);
       this.maxCorner = asVector(maxCorner);
       this.data = data;
@@ -715,6 +763,7 @@
     // utils
     normalizeVector, clampVector, lerp, clamp, cartesianToPolar,
     polarToCartesian, rotateVector, quantizeVector, kmeans,
+    UnusedArgumentWarning, warnUnusedArguments, warnings: warningSettings,
     // scalar fields
     ScalarField, ConstantField, GaussianField, BoxField, MatrixField,
     KernelProbabilisticMatrixField,
