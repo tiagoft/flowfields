@@ -57,5 +57,9 @@ where = ["src/"]
 dev = [
     "matplotlib>=3.7",
     "pycairo>=1.29.0",
+    "pytest>=8",
     "tqdm>=4.67.1",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
