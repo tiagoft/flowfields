@@ -16,6 +16,13 @@ pip install flowfields
 uv add flowfields
 ```
 
+The library needs only numpy and Pillow. `MatrixField.plot_figure` also needs
+matplotlib, which comes with the `plot` extra:
+
+```bash
+pip install "flowfields[plot]"
+```
+
 To get the latest version from GitHub instead:
 
 ```bash
