@@ -63,8 +63,9 @@ LICENSE.
 - [ ] Decide how tags are created: by hand when releasing, or by the version
       hook on every merge. jsDelivr needs the tags to serve a fixed version
       of `flowfields.js`.
-- [ ] Publish to PyPI, and check `pip install flowfields` in a clean
-      environment.
+- [x] Publish to PyPI, and check `pip install flowfields` in a clean
+      environment: 0.2.0 is on https://pypi.org/project/flowfields/
+      (2026-11-21).
 
 ## JS
 
