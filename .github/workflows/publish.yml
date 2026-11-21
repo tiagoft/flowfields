@@ -1,9 +1,10 @@
 name: publish
 
-# Pushing a tag such as v0.2.0 publishes that version to PyPI. The tag must
-# match the version in pyproject.toml. Publishing uses trusted publishing:
-# PyPI lists this workflow, with the environment named below, as a trusted
-# publisher, so no token is stored.
+# Pushing a tag such as v0.2.0 publishes that version to PyPI and to npm. The
+# tag must match the version in pyproject.toml and js/package.json.
+# Publishing uses trusted publishing: PyPI and npm each list this workflow,
+# with the environment named in its job, as a trusted publisher, so no token
+# is stored.
 
 on:
   push:
@@ -64,3 +65,44 @@ jobs:
           name: dist
           path: dist/
       - uses: pypa/gh-action-pypi-publish@release/v1
+
+  npm:
+    name: Publish to npm
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: npm
+      url: https://www.npmjs.com/package/flowfields
+    permissions:
+      contents: read
+      id-token: write
+    defaults:
+      run:
+        working-directory: js
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - name: The tag matches the version
+        run: |
+          version=$(node -p "require('./package.json').version")
+          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "::error::The tag is $GITHUB_REF_NAME, but js/package.json has version $version"
+            exit 1
+          fi
+
+      - name: Tests
+        run: |
+          npm ci
+          npm test
+
+      # Trusted publishing needs npm 11.5.1 or later
+      - name: Update npm
+        run: npm install -g npm@latest
+
+      # prepack copies the LICENSE in; provenance is added automatically
+      - name: Publish
+        run: npm publish
