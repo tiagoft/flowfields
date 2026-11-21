@@ -7,6 +7,8 @@
 
 A generative-art toolkit built around composable **vector fields** and **scalar fields**.  Fields form trees (similar to syntax trees): leaf nodes are primitives and internal nodes are combinators.  It comes in Python and as a [p5.js](https://p5js.org) library.
 
+
+
 See the [demos](https://github.com/tiagoft/flowfields/blob/main/demos/README.md) for a small script and a figure for each feature.
 
 ## Installation
@@ -155,6 +157,14 @@ Pieces made with flowfields for [Genuary 2026](https://genuary.art). Click an im
 | [![Genuary 16](https://raw.githubusercontent.com/tiagoft/flowfields/main/artwork/genuary2026/images/genuary16.jpg)](https://github.com/tiagoft/flowfields/blob/main/artwork/genuary2026/genuary16.py) | [![Genuary 19](https://raw.githubusercontent.com/tiagoft/flowfields/main/artwork/genuary2026/images/genuary19.jpg)](https://github.com/tiagoft/flowfields/blob/main/artwork/genuary2026/genuary19.py) | [![Genuary 25](https://raw.githubusercontent.com/tiagoft/flowfields/main/artwork/genuary2026/images/genuary25.jpg)](https://github.com/tiagoft/flowfields/blob/main/artwork/genuary2026/genuary25.py) |
 
 All pieces are in [`artwork/genuary2026`](https://github.com/tiagoft/flowfields/tree/main/artwork/genuary2026).
+
+## About
+
+The library was built when I was studying art with flow fields using Python and NumPy. I eventually got annoyed by "guessing" functions for the vector fields, so I thought that having primitive fields (like expansions around a point, or rotations around a point) and ways to combine them (by adding them, applying spatial fades, and so on) would give me greater control of all of that.
+
+I had been thinking about porting the library to p5.js for a while - and this is where agentic AI came in0. The JS version is generated from the Python code by an AI agent, and tests check that both give the same numbers. It also helped me set up CI/CD, PyPi and npm packages, and organize my library of examples.
+
+If you are doing creative coding or generative arts with flow fields, I hope this library is useful for you - if not by its code, maybe by its rationale. Enjoy!
 
 ## License
 
