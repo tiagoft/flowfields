@@ -54,19 +54,15 @@ LICENSE.
 ### Publishing
 
 - [x] The first public version is 0.2.0.
-- [ ] Create a PyPI account with two-factor authentication, and a TestPyPI
-      account.
+- [x] Create a PyPI account with two-factor authentication.
 - [x] Set up trusted publishing: a GitHub Action publishes when a `v*` tag
       is pushed, with no token stored anywhere.
-- [ ] Register the workflow as a trusted publisher, on PyPI and on TestPyPI
-      (for a project that does not exist yet, as a "pending publisher"):
-      owner `tiagoft`, repository `flowfields`, workflow `publish.yml`,
-      environment `pypi` on PyPI and `testpypi` on TestPyPI.
+- [x] Register the workflow as a trusted publisher on PyPI: owner
+      `tiagoft`, repository `flowfields`, workflow `publish.yml`, environment
+      `pypi`. Releases go straight to PyPI, without TestPyPI.
 - [ ] Decide how tags are created: by hand when releasing, or by the version
       hook on every merge. jsDelivr needs the tags to serve a fixed version
       of `flowfields.js`.
-- [ ] Publish to TestPyPI first, and install from there with
-      `pip install -i https://test.pypi.org/simple/ flowfields`.
 - [ ] Publish to PyPI, and check `pip install flowfields` in a clean
       environment.
 
