@@ -1,8 +1,9 @@
 """Color field that draws colors from the local palette of an image."""
 
-from flowfields.color_fields.base import ColorField
 import numpy as np
-from sklearn.cluster import KMeans
+
+from flowfields.color_fields.base import ColorField
+from flowfields.utils import kmeans
 
 
 class MatrixColorField(ColorField):
@@ -24,8 +25,8 @@ class MatrixColorField(ColorField):
         max_corner: Point that maps to the last row and column of the matrix.
         data: Array of RGB colors with shape (H, W, 3).
         n_colors: Size of the palette.
-        random_state: Seed for k-means.  It does not affect the color draws,
-            which use ``rng``.
+        random_state: Seed for k-means (``flowfields.utils.kmeans``).  It
+            does not affect the color draws, which use ``rng``.
         kernel_size: Side of the window, as a fraction of the largest side of
             the matrix.
         temperature: Lower values favour the most common color in the window,
@@ -56,18 +57,18 @@ class MatrixColorField(ColorField):
         self.temperature = temperature
         self.rng = np.random.default_rng(rng)
 
-        # Perform k-means clustering to find the n_colors most representative colors
-        self.kmeans = KMeans(
-            n_clusters=self.n_colors,
-            random_state=self.random_state,
-        )
-        self.kmeans.fit(self.data.reshape(-1, 3))
-
-        # Classify every pixel once and build one integral image (2D prefix
-        # sum) per cluster, so windowed pixel counts can be looked up in
-        # O(1) instead of reclassifying pixels on every get_probs call.
+        # The palette: the n_colors centers of the image's pixels, and the
+        # palette color of every pixel
         h, w, _ = self.data.shape
-        labels = self.kmeans.predict(self.data.reshape(-1, 3)).reshape(h, w)
+        self.palette, labels = kmeans(
+            self.data.reshape(-1, 3),
+            self.n_colors,
+            rng=self.random_state,
+        )
+        labels = labels.reshape(h, w)
+
+        # One integral image (2D prefix sum) per palette color, so windowed
+        # pixel counts can be looked up in O(1) on every get_probs call.
         self.integral_images = np.zeros((self.n_colors, h + 1, w + 1), dtype=np.int32)
         for k in range(self.n_colors):
             mask = labels == k
@@ -132,4 +133,4 @@ class MatrixColorField(ColorField):
         """
         probs = self.get_probs(x)
         sample = self.rng.choice(self.n_colors, p=probs.flatten())
-        return self.kmeans.cluster_centers_[sample]
+        return self.palette[sample]

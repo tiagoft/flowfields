@@ -20,6 +20,93 @@ def open_image(filename: str, mode: str = "RGB") -> np.ndarray:
         return np.array(img.convert(mode), dtype=float) / 255.0
 
 
+def kmeans(
+    data: np.ndarray,
+    n_clusters: int,
+    rng: np.random.Generator | int | None = None,
+    max_iter: int = 100,
+    tol: float = 1e-4,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Group points into n_clusters clusters with k-means
+
+    The first centers are chosen with k-means++: each new center is a data
+    point drawn with probability proportional to its squared distance to the
+    nearest center so far.  Then each point goes to its nearest center and
+    each center moves to the mean of its points (Lloyd's algorithm).  It
+    stops when no point changes cluster, when the centers move less than
+    ``tol`` times the variance of the data (the sum of the squared moves,
+    over the mean variance of the dimensions, as in scikit-learn), or after
+    max_iter rounds.  A cluster that loses all its points keeps its previous
+    center.
+
+    Args:
+        data (np.ndarray): Points with shape (n_points, n_dims), such as the
+            pixels of an image reshaped to (H * W, 3)
+        n_clusters (int): Number of clusters, from 1 to n_points
+        rng (np.random.Generator | int | None): Random generator for the
+            first centers, or a seed for one.  None takes a fresh seed from
+            the operating system.
+        max_iter (int): Maximum number of rounds
+        tol (float): Relative tolerance on the moves of the centers
+
+    Returns:
+        tuple[np.ndarray, np.ndarray]: The centers, with shape
+            (n_clusters, n_dims), and the cluster of each point, with shape
+            (n_points,)
+    """
+    rng = np.random.default_rng(rng)
+    data = np.asarray(data, dtype=float)
+    n_points = data.shape[0]
+    if not 1 <= n_clusters <= n_points:
+        raise ValueError(
+            f"n_clusters must be between 1 and {n_points}, got {n_clusters}")
+
+    # k-means++ initialization
+    centers = np.empty((n_clusters, data.shape[1]))
+    centers[0] = data[rng.integers(n_points)]
+    distances = np.sum((data - centers[0])**2, axis=1)
+    for k in range(1, n_clusters):
+        total = np.sum(distances)
+        if total > 0:
+            idx = rng.choice(n_points, p=distances / total)
+        else:  # every point is already on a center
+            idx = rng.integers(n_points)
+        centers[k] = data[idx]
+        distances = np.minimum(distances, np.sum((data - centers[k])**2, axis=1))
+
+    # Lloyd's algorithm
+    threshold = tol * np.mean(np.var(data, axis=0))
+    labels = _nearest_center(data, centers)
+    for _ in range(max_iter):
+        moved = 0.0
+        for k in range(n_clusters):
+            members = data[labels == k]
+            if len(members) > 0:
+                new_center = np.mean(members, axis=0)
+                moved += np.sum((new_center - centers[k])**2)
+                centers[k] = new_center
+        new_labels = _nearest_center(data, centers)
+        if np.array_equal(new_labels, labels):
+            break
+        labels = new_labels
+        if moved <= threshold:
+            break
+
+    return centers, labels
+
+
+def _nearest_center(data: np.ndarray, centers: np.ndarray) -> np.ndarray:
+    """Index of the nearest center to each point; ties go to the first one"""
+    best = np.full(data.shape[0], np.inf)
+    labels = np.zeros(data.shape[0], dtype=int)
+    for k in range(centers.shape[0]):
+        distances = np.sum((data - centers[k])**2, axis=1)
+        closer = distances < best
+        best[closer] = distances[closer]
+        labels[closer] = k
+    return labels
+
+
 def normalize_vector(v: np.ndarray) -> np.ndarray:
     """Normalize a vector in cartesian form
 
