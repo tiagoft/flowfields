@@ -3,9 +3,9 @@
 // GENERATED from src/flowfields by the port-js skill (.claude/skills/port-js).
 // Do not edit by hand: change the Python code and run /port-js again.
 //
-// source-commit: 0cdd4c8
+// source-commit: 510afc6
 //
-// Not ported yet:     FieldSelect
+// Not ported yet:     (nothing)
 // Python-only:        utils.open_image (use imageToMatrix), MatrixField.plot_figure
 //
 // Usage: load p5.js, then this file, and build fields inside setup() or later
@@ -623,6 +623,93 @@
   }
 
   // ---------------------------------------------------------------------------
+  // src/flowfields/vector_fields/select.py
+  // ---------------------------------------------------------------------------
+
+  /**
+   * p_i(x) ∝ w_i(x)^(1 / (1 + T)); with probability changeIdProb per call,
+   * selectN fields are drawn and blended with FieldSum, over lerpLen calls.
+   */
+  class FieldSelect extends FlowField {
+    constructor({
+      fields, weights = null, selectN = 1, changeIdProb = 0.1, temperature = 0.0,
+      normalize = true, lerpLen = 0, rng,
+      ...rest
+    }) {
+      super();
+      warnUnusedArguments(this, rest);
+      this.listOfFields = fields;
+      this.weights = weights;
+      this.changeIdProb = changeIdProb;
+      this.normalize = normalize;
+      this.selectN = selectN;
+      this.temperature = temperature;
+      this.lerpLen = lerpLen;
+      this.lerpCount = 0;
+      this.rng = defaultRng(rng);
+
+      // The first fields are drawn on the first call, where the weights can
+      // be evaluated
+      this.lastIdx = null;
+      this.currentField = null;
+      this.nextField = null;
+    }
+
+    /** Draws the indices of the fields to activate, without repetition. */
+    selectIndex(x = null) {
+      const magnitudes = this.listOfFields.map((_, idx) =>
+        this.weights !== null && x !== null ? weightAt(this.weights[idx], x) : 1.0);
+      const total = magnitudes.reduce((a, b) => a + b, 0);
+      // If every weight is zero here, fall back to a uniform choice
+      let p = total > 0
+        ? magnitudes.map((m) => m / total)
+        : magnitudes.map(() => 1.0 / magnitudes.length);
+      // Higher temperature makes the distribution more uniform
+      if (this.temperature > 0) {
+        p = p.map((v) => v ** (1.0 / (1.0 + this.temperature)));
+        const sum = p.reduce((a, b) => a + b, 0);
+        p = p.map((v) => v / sum);
+      }
+      // Fields with zero probability are never drawn, even if that means
+      // blending fewer than selectN fields
+      const nonzero = p.filter((v) => v !== 0).length;
+      return this.rng.choice(this.listOfFields.length, {
+        p,
+        size: Math.min(this.selectN, nonzero),
+        replace: false,
+      });
+    }
+
+    at(x) {
+      if ((this.lastIdx === null || this.rng.random() < this.changeIdProb) && this.lerpCount === 0) {
+        this.lastIdx = this.selectIndex(x);
+        const fields = this.lastIdx.map((i) => this.listOfFields[i]);
+        const weights = this.weights !== null ? this.lastIdx.map((i) => this.weights[i]) : null;
+        this.nextField = new FieldSum({ fields, weights });
+        this.lerpCount = 0;
+        if (this.currentField === null) this.currentField = this.nextField; // first call: no transition
+      }
+
+      let y;
+      if (this.currentField === this.nextField) {
+        y = this.currentField.at(x);
+      } else if (this.lerpCount < this.lerpLen) {
+        const t = this.lerpCount / this.lerpLen;
+        y = p5.Vector.mult(this.currentField.at(x), 1 - t).add(p5.Vector.mult(this.nextField.at(x), t));
+        this.lerpCount += 1;
+      } else {
+        // The transition is over: the new field is used from this call on
+        this.currentField = this.nextField;
+        this.lerpCount = 0;
+        y = this.currentField.at(x);
+      }
+
+      if (this.normalize) y = normalizeVector(y);
+      return y;
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // src/flowfields/color_fields/base.py
   // ---------------------------------------------------------------------------
 
@@ -769,6 +856,7 @@
     KernelProbabilisticMatrixField,
     // vector fields
     FlowField, RotationField, ExpansionField, NoiseField, FieldSum, FieldMax,
+    FieldSelect,
     // color fields
     ColorField, MatrixColorField,
     // p5 extras
