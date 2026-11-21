@@ -1,0 +1,71 @@
+<!doctype html>
+<!--
+  flowfields example: regions. Drop-in: save this file anywhere and open it in
+  a browser. In the p5.js web editor, put the two <script src> lines in
+  index.html and the code inside the last <script> in sketch.js.
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>flowfields · regions</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@2.4.0/lib/p5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/tiagoft/flowfields@v0.2.0/js/flowfields.js"></script>
+    <style>body { margin: 0; background: #f5f2eb; }</style>
+  </head>
+  <body>
+    <script>
+      // FieldMax uses, at each point, only the field with the highest weight,
+      // so the plane splits into regions with sharp borders. Each line takes
+      // the color of the field that wins where it starts.
+      const { RotationField, ExpansionField, FieldMax, GaussianField, Generator, vec } = flowfields;
+
+      const COLORS = ["#32527b", "#b5543c", "#3f7d5c", "#c7962e"];
+
+      let field;
+      let weights;
+      let rng;
+
+      function setup() {
+        createCanvas(600, 600);
+        background("#f5f2eb");
+        rng = new Generator(1);
+
+        const centers = [vec(170, 180), vec(440, 150), vec(200, 440), vec(450, 430)];
+        const fields = [
+          new RotationField({ center: centers[0] }),
+          new ExpansionField({ center: centers[1] }),
+          new RotationField({ center: centers[2], direction: -1 }),
+          new ExpansionField({ center: centers[3], direction: -1 }),
+        ];
+        weights = centers.map((center) => new GaussianField({ center, sigma: 150 }));
+        field = new FieldMax({ fields, weights });
+
+        strokeWeight(0.8);
+        noFill();
+      }
+
+      /** The index of the field with the highest weight at x, as FieldMax picks it */
+      function winner(x) {
+        let best = 0;
+        weights.forEach((w, i) => { if (w.at(x) > weights[best].at(x)) best = i; });
+        return best;
+      }
+
+      function draw() {
+        for (let n = 0; n < 25; n++) {
+          let x = vec(rng.uniform(0, width), rng.uniform(0, height));
+          const c = color(COLORS[winner(x)]);
+          c.setAlpha(150);
+          stroke(c);
+          beginShape();
+          for (let i = 0; i < 35; i++) {
+            vertex(x.x, x.y);
+            x = p5.Vector.add(x, p5.Vector.mult(field.at(x), 3));
+          }
+          endShape();
+        }
+        if (frameCount >= 160) noLoop();
+      }
+    </script>
+  </body>
+</html>

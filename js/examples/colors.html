@@ -1,0 +1,78 @@
+<!doctype html>
+<!--
+  flowfields example: colors. Drop-in: save this file anywhere and open it in
+  a browser. In the p5.js web editor, put the two <script src> lines in
+  index.html and the code inside the last <script> in sketch.js.
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>flowfields · colors</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@2.4.0/lib/p5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/tiagoft/flowfields@v0.2.0/js/flowfields.js"></script>
+    <style>body { margin: 0; background: #f5f2eb; }</style>
+  </head>
+  <body>
+    <script>
+      // Lines that take their colors from an image, with MatrixColorField.
+      // Each line gets a color drawn from the palette of the image around its
+      // starting point. Field coordinates are pixels, with y growing downward
+      // as on the canvas, which matches MatrixColorField: the first row of
+      // the image is at the lowest y.
+      const {
+        RotationField, NoiseField, FieldSum, GaussianField, MatrixColorField,
+        Generator, imageToMatrix, vec,
+      } = flowfields;
+
+      const IMAGE = "https://cdn.jsdelivr.net/gh/tiagoft/flowfields@v0.2.0/demos/eiffel.jpeg";
+
+      let field;
+      let colors;
+      let rng;
+
+      async function setup() {
+        const img = await loadImage(IMAGE);
+        createCanvas(img.width, img.height);
+        background("#f5f2eb");
+        rng = new Generator(0);
+
+        const center = vec(width * 0.5, height * 0.4);
+        field = new FieldSum({
+          fields: [new RotationField({ center }), new NoiseField({ rng })],
+          weights: [new GaussianField({ center, sigma: width * 0.35 }), 0.3],
+        });
+
+        // 12 colors from the image, drawn mostly from the most common color
+        // around each point
+        colors = new MatrixColorField({
+          minCorner: [0, 0],
+          maxCorner: [width - 1, height - 1],
+          data: imageToMatrix(img, "RGB"),
+          nColors: 12,
+          temperature: 0.05,
+          rng,
+        });
+
+        strokeWeight(0.8);
+        noFill();
+      }
+
+      function draw() {
+        if (!colors) return; // setup is still loading the image
+
+        for (let n = 0; n < 40; n++) {
+          let x = vec(rng.uniform(0, width), rng.uniform(0, height));
+          const [r, g, b] = colors.at(x);
+          stroke(255 * r, 255 * g, 255 * b, 170);
+          beginShape();
+          for (let i = 0; i < 40; i++) {
+            vertex(x.x, x.y);
+            x = p5.Vector.add(x, p5.Vector.mult(field.at(x), 2));
+          }
+          endShape();
+        }
+        if (frameCount >= 150) noLoop();
+      }
+    </script>
+  </body>
+</html>

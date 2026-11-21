@@ -1,0 +1,63 @@
+<!doctype html>
+<!--
+  flowfields example: flow. Drop-in: save this file anywhere and open it in a
+  browser. In the p5.js web editor, put the two <script src> lines in
+  index.html and the code inside the last <script> in sketch.js.
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>flowfields · flow</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@2.4.0/lib/p5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/tiagoft/flowfields@v0.2.0/js/flowfields.js"></script>
+    <style>body { margin: 0; background: #f5f2eb; }</style>
+  </head>
+  <body>
+    <script>
+      // Lines through a sum of a rotation, an expansion toward a point and
+      // some noise, each with its own weight. Field coordinates are pixels.
+      const { RotationField, ExpansionField, NoiseField, FieldSum, GaussianField, Generator, vec } = flowfields;
+
+      let field;
+      let rng;
+
+      function setup() {
+        createCanvas(600, 600);
+        background("#f5f2eb");
+        rng = new Generator(0);
+
+        const a = vec(180, 240);
+        const b = vec(450, 390);
+        field = new FieldSum({
+          fields: [
+            new RotationField({ center: a }),
+            new ExpansionField({ center: b, direction: -1 }),
+            new NoiseField({ rng }),
+          ],
+          weights: [
+            new GaussianField({ center: a, sigma: 180 }),
+            new GaussianField({ center: b, sigma: 150 }),
+            0.15,
+          ],
+        });
+        stroke(50, 82, 123, 120);
+        strokeWeight(0.7);
+        noFill();
+      }
+
+      function draw() {
+        // a few lines per frame, so the drawing builds up
+        for (let n = 0; n < 20; n++) {
+          let x = vec(rng.uniform(0, width), rng.uniform(0, height));
+          beginShape();
+          for (let i = 0; i < 60; i++) {
+            vertex(x.x, x.y);
+            x = p5.Vector.add(x, p5.Vector.mult(field.at(x), 3));
+          }
+          endShape();
+        }
+        if (frameCount >= 200) noLoop();
+      }
+    </script>
+  </body>
+</html>
