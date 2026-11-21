@@ -162,7 +162,7 @@ All pieces are in [`artwork/genuary2026`](https://github.com/tiagoft/flowfields/
 
 The library was built when I was studying art with flow fields using Python and NumPy. I eventually got annoyed by "guessing" functions for the vector fields, so I thought that having primitive fields (like expansions around a point, or rotations around a point) and ways to combine them (by adding them, applying spatial fades, and so on) would give me greater control of all of that.
 
-I had been thinking about porting the library to p5.js for a while - and this is where agentic AI came in0. The JS version is generated from the Python code by an AI agent, and tests check that both give the same numbers. It also helped me set up CI/CD, PyPi and npm packages, and organize my library of examples.
+I had been thinking about porting the library to p5.js for a while - and this is where agentic AI came in0. The JS version is generated from the Python code (which I wrote by hand) by an AI agent, and tests check that both give the same numbers. It also helped me set up CI/CD, PyPi and npm packages, and organize my library of examples.
 
 If you are doing creative coding or generative arts with flow fields, I hope this library is useful for you - if not by its code, maybe by its rationale. Enjoy!
 
