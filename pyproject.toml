@@ -30,7 +30,6 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "matplotlib>=3.7",
     "numpy>=1.24",
     "pillow>=10.0",
 ]
@@ -42,6 +41,11 @@ Issues = "https://github.com/tiagoft/flowfields/issues"
 Demos = "https://github.com/tiagoft/flowfields/blob/main/demos/README.md"
 Author = "https://tiagoft.github.io"
 
+[project.optional-dependencies]
+plot = [
+    "matplotlib>=3.7",
+]
+
 [build-system]
 requires = ["setuptools>=77.0.0", "wheel>=0.40.0"]
 build-backend = "setuptools.build_meta"
@@ -51,6 +55,7 @@ where = ["src/"]
 
 [dependency-groups]
 dev = [
+    "matplotlib>=3.7",
     "pycairo>=1.29.0",
     "tqdm>=4.67.1",
 ]

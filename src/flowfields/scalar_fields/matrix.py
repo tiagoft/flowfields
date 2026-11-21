@@ -88,8 +88,16 @@ class MatrixField(ScalarField):
             cmap: Matplotlib colormap name.
             vmin: Value at the bottom of the colormap.
             vmax: Value at the top of the colormap.
+
+        Needs matplotlib, which comes with ``pip install "flowfields[plot]"``.
         """
-        import matplotlib.pyplot as plt
+        try:
+            import matplotlib.pyplot as plt
+        except ImportError as error:
+            raise ImportError(
+                "MatrixField.plot_figure needs matplotlib: "
+                'pip install "flowfields[plot]"'
+            ) from error
 
         plt.figure(figsize=figsize)
         plt.imshow(self.data, cmap=cmap, vmin=vmin, vmax=vmax)
