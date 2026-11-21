@@ -3,7 +3,7 @@
 // GENERATED from src/tstudio by the port-js skill (.claude/skills/port-js).
 // Do not edit by hand: change the Python code and run /port-js again.
 //
-// source-commit: 422f575
+// source-commit: 009fcb6
 //
 // Not ported yet:     FieldSelect, MatrixColorField
 // Python-only:        utils.open_image (use imageToMatrix), MatrixField.plot_figure
