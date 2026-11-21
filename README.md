@@ -38,11 +38,12 @@ pip install git+https://github.com/tiagoft/flowfields.git
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/p5@2.4.0/lib/p5.min.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/tiagoft/flowfields@main/js/flowfields.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/tiagoft/flowfields@v0.2.0/js/flowfields.js"></script>
 ```
 
 Build fields inside `setup()` or later. The [JS README](https://github.com/tiagoft/flowfields/blob/main/js/README.md) shows how
-the Python API maps to JS, and [`js/examples/`](https://github.com/tiagoft/flowfields/tree/main/js/examples) has sketches.
+the Python API maps to JS, and [`js/examples/`](https://github.com/tiagoft/flowfields/tree/main/js/examples) has drop-in sketches:
+single HTML files to save and open in a browser.
 
 ### Running the demos
 
