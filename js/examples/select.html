@@ -1,0 +1,62 @@
+<!doctype html>
+<!--
+  flowfields example: select. Drop-in: save this file anywhere and open it in
+  a browser. In the p5.js web editor, put the two <script src> lines in
+  index.html and the code inside the last <script> in sketch.js.
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>flowfields · select</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@2.4.0/lib/p5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/tiagoft/flowfields@v0.2.0/js/flowfields.js"></script>
+    <style>body { margin: 0; background: #f5f2eb; }</style>
+  </head>
+  <body>
+    <script>
+      // FieldSelect switches between its fields as it is called, so a single
+      // long line wanders from one rotation to another. lerpLen smooths each
+      // switch over that many steps; set it to 0 to see sharp corners.
+      const { RotationField, ExpansionField, FieldSelect, FieldSum, Generator, vec } = flowfields;
+
+      let field;
+      let x;
+
+      function setup() {
+        createCanvas(600, 600);
+        background("#f5f2eb");
+        const rng = new Generator(3);
+
+        const rotations = [];
+        for (let i = 0; i < 6; i++) {
+          rotations.push(new RotationField({
+            center: vec(rng.uniform(150, 450), rng.uniform(150, 450)),
+            direction: rng.random() < 0.5 ? 1 : -1,
+          }));
+        }
+        // a weak pull toward the middle keeps the line on the canvas
+        const pull = new ExpansionField({ center: vec(300, 300), direction: -1 });
+        field = new FieldSum({
+          fields: [
+            new FieldSelect({ fields: rotations, changeIdProb: 0.01, lerpLen: 60, rng }),
+            pull,
+          ],
+          weights: [1.0, 0.15],
+        });
+
+        x = vec(300, 300);
+        stroke(50, 82, 123, 160);
+        strokeWeight(0.8);
+      }
+
+      function draw() {
+        for (let i = 0; i < 60; i++) {
+          const next = p5.Vector.add(x, p5.Vector.mult(field.at(x), 2));
+          line(x.x, x.y, next.x, next.y);
+          x = next;
+        }
+        if (frameCount >= 400) noLoop();
+      }
+    </script>
+  </body>
+</html>

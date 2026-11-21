@@ -116,5 +116,11 @@ same numbers for the same inputs, and `js/test/fixtures.json` (made by
   so `p5.Vector.add(a, b)` gives `NaN` before that. Fields are built inside
   `setup()` or later; `js/test/load.js` creates an empty sketch for the
   tests.
-- `js/examples/` has sketches that use the library. When a port changes a
-  constructor that an example uses, update the example too.
+- `js/examples/` has drop-in sketches: single HTML files that load p5 and
+  `flowfields.js` from jsDelivr, pinned to a released tag
+  (`.../flowfields@v0.2.0/js/flowfields.js`), so they keep working when
+  `main` changes. A port does not change them. After a release whose
+  changes an example should use, move its tag in the URL to the new one.
+  To try an example against the local port, serve the repository
+  (`python3 -m http.server`) and point its `<script src>` to
+  `../flowfields.js`.

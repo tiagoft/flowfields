@@ -1,0 +1,58 @@
+<!doctype html>
+<!--
+  flowfields example: quantize. Drop-in: save this file anywhere and open it in
+  a browser. In the p5.js web editor, put the two <script src> lines in
+  index.html and the code inside the last <script> in sketch.js.
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>flowfields · quantize</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@2.4.0/lib/p5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/tiagoft/flowfields@v0.2.0/js/flowfields.js"></script>
+    <style>body { margin: 0; background: #f5f2eb; }</style>
+  </head>
+  <body>
+    <script>
+      // quantizeVector rounds the direction of each step to one of nLevels
+      // directions, so the circles of a rotation become polygons: triangles,
+      // squares and hexagons from left to right.
+      const { RotationField, quantizeVector, vec } = flowfields;
+
+      const LEVELS = [3, 4, 6];
+      let fields;
+
+      function setup() {
+        createCanvas(900, 320);
+        background("#f5f2eb");
+        fields = LEVELS.map((_, i) => new RotationField({ center: vec(150 + 300 * i, 160) }));
+        stroke(50, 82, 123, 170);
+        strokeWeight(0.8);
+        noFill();
+        noLoop();
+      }
+
+      function draw() {
+        LEVELS.forEach((nLevels, i) => {
+          // one closed path for each radius
+          for (let r = 12; r <= 132; r += 12) {
+            let x = vec(150 + 300 * i + r, 160);
+            beginShape();
+            for (let step = 0; step < 400; step++) {
+              vertex(x.x, x.y);
+              const v = quantizeVector(fields[i].at(x), nLevels);
+              x = p5.Vector.add(x, p5.Vector.mult(v, 2));
+            }
+            endShape();
+          }
+          noStroke();
+          fill(90);
+          textAlign(CENTER);
+          text(`nLevels = ${nLevels}`, 150 + 300 * i, 310);
+          stroke(50, 82, 123, 170);
+          noFill();
+        });
+      }
+    </script>
+  </body>
+</html>

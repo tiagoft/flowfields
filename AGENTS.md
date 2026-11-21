@@ -76,6 +76,9 @@ git tag "v$(sed -n 's/^version = "\(.*\)"$/\1/p' pyproject.toml)"
 git push origin --tags
 ```
 
-Tag `main` after the merge that should be released. Do not create or push
+Tag `main` after the merge that should be released. The JS examples, the
+READMEs and `js/README.md` load `flowfields.js` from jsDelivr at a fixed tag
+(`@v0.2.0`); after a release, move those URLs to the new tag if they should
+use it. Do not create or push
 tags unless the user asks: a pushed tag publishes, and PyPI never accepts the
 same version twice.

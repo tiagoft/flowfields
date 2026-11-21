@@ -11,8 +11,12 @@ it, and gives the same numbers for the same inputs.
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/p5@2.4.0/lib/p5.min.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/tiagoft/flowfields@main/js/flowfields.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/tiagoft/flowfields@v0.2.0/js/flowfields.js"></script>
 ```
+
+The `@v0.2.0` in the URL is the version: each release on
+[PyPI](https://pypi.org/project/flowfields/) has a tag of the same name.
+`@main` gives the latest code instead, which can change at any time.
 
 It defines the global `flowfields`. In node, `require("flowfields")` gives the
 same object, but p5 must already be loaded as the global `p5`.
@@ -52,16 +56,24 @@ function draw() {
 The library gives the fields; following them, as this sketch does with
 lines, is up to you.
 
-More in [`examples/`](https://github.com/tiagoft/flowfields/tree/main/js/examples):
+More in [`examples/`](https://github.com/tiagoft/flowfields/tree/main/js/examples).
+Each one is a single HTML file that loads p5 and flowfields from a CDN, so
+you can save it anywhere and open it in a browser:
 
-- [`flow`](https://github.com/tiagoft/flowfields/tree/main/js/examples/flow): lines through a sum of fields with Gaussian
+- [`flow.html`](https://github.com/tiagoft/flowfields/blob/main/js/examples/flow.html): lines through a sum of fields with Gaussian
   weights.
-- [`colors`](https://github.com/tiagoft/flowfields/tree/main/js/examples/colors): lines colored from an image with
+- [`colors.html`](https://github.com/tiagoft/flowfields/blob/main/js/examples/colors.html): lines colored from an image with
   `MatrixColorField`.
+- [`regions.html`](https://github.com/tiagoft/flowfields/blob/main/js/examples/regions.html): `FieldMax` splits the plane into
+  regions with sharp borders.
+- [`select.html`](https://github.com/tiagoft/flowfields/blob/main/js/examples/select.html): `FieldSelect` makes one long line switch
+  between rotations.
+- [`quantize.html`](https://github.com/tiagoft/flowfields/blob/main/js/examples/quantize.html): `quantizeVector` turns circles into
+  polygons.
 
-The examples load files, so open them through a local server, such as
-`python3 -m http.server` from the root of the repository, and not as
-`file://` pages.
+In the [p5.js web editor](https://editor.p5js.org), put the two
+`<script src>` lines in `index.html` and the code of the last `<script>` in
+`sketch.js`.
 
 ## From Python to JS
 
