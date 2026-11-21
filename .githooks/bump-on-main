@@ -1,0 +1,16 @@
+#!/bin/sh
+# Bump the patch version in every commit that lands on main.
+# Called by pre-commit (direct commits, merges that stopped on conflicts)
+# and pre-merge-commit (git merge --no-ff).
+
+branch=$(git symbolic-ref --quiet --short HEAD) || exit 0
+[ "$branch" = main ] || exit 0
+
+if ! git diff --quiet -- pyproject.toml uv.lock; then
+    echo "bump-on-main: pyproject.toml or uv.lock has unstaged changes;" >&2
+    echo "stage or discard them before committing on main." >&2
+    exit 1
+fi
+
+python3 tools/bump_version.py || exit 1
+git add pyproject.toml uv.lock
