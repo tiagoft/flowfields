@@ -3,6 +3,14 @@
 Ideas that are planned but not started. Move an item out of here when its
 work begins.
 
+## Before publishing to PyPI
+
+The README becomes the PyPI page, where relative links break. Make its links
+absolute (`https://raw.githubusercontent.com/tiagoft/flowfields/main/...` for
+images, `https://github.com/tiagoft/flowfields/blob/main/...` for files) once
+the repository is public. While it is private, absolute links break on GitHub
+itself, because GitHub loads images through a proxy that has no access to it.
+
 ## Tracing lines through a field
 
 Today the library gives a vector for each point, but following the field to
