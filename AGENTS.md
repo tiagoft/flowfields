@@ -69,7 +69,8 @@ git config pull.ff only
 ## Releasing
 
 Pushing a tag `v` + the version in `pyproject.toml` runs
-`.github/workflows/publish.yml`, which tests, builds and publishes to PyPI:
+`.github/workflows/publish.yml`, which tests, builds and publishes to PyPI
+and npm:
 
 ```sh
 git tag "v$(sed -n 's/^version = "\(.*\)"$/\1/p' pyproject.toml)"

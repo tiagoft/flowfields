@@ -69,9 +69,14 @@ LICENSE.
 
 ## JS
 
-- [ ] Publish `flowfields` on npm (the name was free on 2026-11-21). The
-      package is ready: `npm pack` gives `flowfields.js`, the README and the
-      LICENSE.
+- [x] The publish workflow has an npm job, with trusted publishing.
+- [ ] Publish `flowfields` on npm by hand once, from the `v0.2.2` tag
+      (`cd js && npm login && npm publish`): npm configures trusted
+      publishing only on a package that exists.
+- [ ] On npmjs.com, in the package's Settings, add the trusted publisher:
+      GitHub Actions, user `tiagoft`, repository `flowfields`, workflow
+      `publish.yml`, environment `npm`, and tick `npm publish` under the
+      allowed actions. From then on, each `v*` tag publishes to npm too.
 - [ ] Publish `js/examples/` on GitHub Pages, so the sketches run in the
       browser from a link.
 
