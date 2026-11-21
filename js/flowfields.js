@@ -3,7 +3,7 @@
 // GENERATED from src/flowfields by the port-js skill (.claude/skills/port-js).
 // Do not edit by hand: change the Python code and run /port-js again.
 //
-// source-commit: e89074e
+// source-commit: 01617e9
 //
 // Not ported yet:     FieldSelect, MatrixColorField
 // Python-only:        utils.open_image (use imageToMatrix), MatrixField.plot_figure
