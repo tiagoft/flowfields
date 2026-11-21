@@ -137,6 +137,16 @@ warnings.simplefilter("ignore", flowfields.UnusedArgumentWarning)
 
 ## Gallery
 
+### Live on OpenProcessing
+
+[![Moving Vortices Number 1: particles glowing through four moving vortices](https://raw.githubusercontent.com/tiagoft/flowfields/main/js/examples/images/vortices.jpg)](https://openprocessing.org/sketch/3068861)
+
+[Moving Vortices Number 1](https://openprocessing.org/sketch/3068861) runs
+flowfields.js in the browser: click the image to open it. Its code is
+[`js/examples/vortices.html`](https://github.com/tiagoft/flowfields/blob/main/js/examples/vortices.html).
+
+### Genuary 2026
+
 Pieces made with flowfields for [Genuary 2026](https://genuary.art). Click an image to see its code.
 
 | | | |
