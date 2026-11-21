@@ -1,0 +1,11 @@
+#!/bin/sh
+# git merge does not put changes staged by pre-merge-commit into the merge
+# commit, so the version bump is still in the index here: fold it in.
+# Fast-forward pulls never run pre-merge-commit, so nothing is staged then.
+
+branch=$(git symbolic-ref --quiet --short HEAD) || exit 0
+[ "$branch" = main ] || exit 0
+git rev-parse --quiet --verify HEAD^2 >/dev/null || exit 0
+git diff --cached --quiet -- pyproject.toml uv.lock && exit 0
+
+git commit --quiet --amend --no-edit --no-verify -- pyproject.toml uv.lock

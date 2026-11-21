@@ -1,7 +1,8 @@
 #!/bin/sh
 # Bump the patch version in every commit that lands on main.
 # Called by pre-commit (direct commits, merges that stopped on conflicts)
-# and pre-merge-commit (git merge --no-ff).
+# and pre-merge-commit (git merge --no-ff), whose bump post-merge folds into
+# the merge commit.
 
 branch=$(git symbolic-ref --quiet --short HEAD) || exit 0
 [ "$branch" = main ] || exit 0
