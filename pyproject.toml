@@ -1,6 +1,6 @@
 [project]
 name = "flowfields"
-version = "0.1.14"
+version = "0.1.15"
 description = "Tools for artwork by composing flow fields"
 readme = "README.md"
 license = "AGPL-3.0-or-later"
@@ -39,7 +39,7 @@ Homepage = "https://github.com/tiagoft/flowfields"
 Source = "https://github.com/tiagoft/flowfields"
 Issues = "https://github.com/tiagoft/flowfields/issues"
 Demos = "https://github.com/tiagoft/flowfields/blob/main/demos/README.md"
-Author = "https://tiagoft.github.io"
+Author = "https://github.com/tiagoft"
 
 [project.optional-dependencies]
 plot = [
