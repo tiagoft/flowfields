@@ -38,7 +38,7 @@ import flowfields.vector_fields as vf
 OUTPUT = Path(__file__).parent.parent / "js" / "test" / "fixtures.json"
 
 # Fields that the JS port does not have yet.  Cases for them are not exported.
-NOT_PORTED = {"FieldSelect"}
+NOT_PORTED = set()
 
 CLASSES = {
     name: getattr(module, name)
@@ -112,6 +112,9 @@ SCALAR_CASES = {
 C = vec(0.37, 0.11)
 GAUSS_A = field("GaussianField", center=vec(-0.5, 0.0), sigma=0.6)
 GAUSS_B = field("GaussianField", center=vec(0.5, 0.3), sigma=0.4, scale=1.5)
+BOX_IN = field("BoxField", min_corner=vec(-0.5, -0.5), max_corner=vec(0.5, 0.6))
+BOX_OUT = field("BoxField", min_corner=vec(-0.5, -0.5), max_corner=vec(0.5, 0.6),
+                inside_value=0.0, outside_value=1.0)
 
 VECTOR_CASES = {
     "rotation": field("RotationField", center=C),
@@ -139,6 +142,23 @@ VECTOR_CASES = {
     "max_scalar_weights_raw": field("FieldMax", fields=[field("RotationField", center=vec(-0.5, 0.0)),
                                                         field("ExpansionField", center=vec(0.5, 0.3))],
                                     weights=[GAUSS_A, GAUSS_B], normalize=False),
+    # FieldSelect draws at random, but these weights leave a single choice
+    # at each point, so the results are deterministic
+    "select_box_weights": field("FieldSelect", fields=[field("RotationField", center=C),
+                                                       field("ExpansionField", center=C)],
+                                weights=[BOX_IN, BOX_OUT], change_id_prob=1.0, rng=0),
+    "select_box_weights_lerp_raw": field("FieldSelect", fields=[field("RotationField", center=C),
+                                                                field("ExpansionField", center=C)],
+                                         weights=[BOX_IN, BOX_OUT], change_id_prob=1.0, lerp_len=3,
+                                         normalize=False, rng=1),
+    "select_all_nonzero_raw": field("FieldSelect", fields=[field("RotationField", center=C),
+                                                           field("ExpansionField", center=vec(0, 0)),
+                                                           field("RotationField", center=vec(1, 1))],
+                                    weights=[1.0, 0.5, 0.0], select_n=3, temperature=1.0,
+                                    change_id_prob=0.3, normalize=False, rng=2),
+    "select_zero_weight_never_starts": field("FieldSelect", fields=[field("RotationField", center=C),
+                                                                    field("ExpansionField", center=C)],
+                                             weights=[0.0, 1.0], change_id_prob=0.0, rng=3),
 }
 
 VECTORS = [vec(3.0, 4.0), vec(0.0, 0.0), vec(-0.2, 0.7), vec(-1.0, -1e-3), vec(0.5, -2.0)]
@@ -164,6 +184,19 @@ STATS_CASES = {
     "rotation_plus_noise_raw": field("FieldSum", fields=[field("RotationField", center=vec(0, 0)),
                                                          field("NoiseField", normalize=False, rng=5)],
                                      weights=[1.0, 0.5], normalize=False),
+    # change_id_prob=1.0 draws anew at every call, so the draws are independent
+    "select_uniform": field("FieldSelect", fields=[field("RotationField", center=vec(0, 0)),
+                                                   field("ExpansionField", center=vec(0, 0))],
+                            change_id_prob=1.0, rng=6),
+    "select_weights_temperature": field("FieldSelect", fields=[field("RotationField", center=vec(0, 0)),
+                                                               field("ExpansionField", center=vec(1, 0)),
+                                                               field("RotationField", center=vec(0, 1), direction=-1)],
+                                        weights=[1.0, 3.0, 0.5], temperature=1.0, change_id_prob=1.0, rng=7),
+    "select_two_of_three_raw": field("FieldSelect", fields=[field("RotationField", center=vec(0, 0)),
+                                                            field("ExpansionField", center=vec(1, 0)),
+                                                            field("RotationField", center=vec(0, 1), direction=-1)],
+                                     weights=[GAUSS_A, GAUSS_B, field("ConstantField", value=0.3)],
+                                     select_n=2, change_id_prob=1.0, normalize=False, rng=8),
 }
 
 
