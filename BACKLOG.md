@@ -11,18 +11,11 @@ LICENSE.
 
 ### The repository goes public
 
-- [ ] Decide whether to recreate the GitHub repository first. Commits from
-      before the history rewrite, with private artwork, may still be reachable
-      by hash on GitHub.
-- [ ] Make the repository public.
-- [ ] Make the README links absolute
-      (`https://raw.githubusercontent.com/tiagoft/flowfields/main/...` for
-      images, `https://github.com/tiagoft/flowfields/blob/main/...` for
-      files), including the two badges, which climb out of the file with
-      `../../`. The README becomes the PyPI page, where relative links break.
-      Do it only after the repository is public: while it is private,
-      absolute links break on GitHub itself, because GitHub loads images
-      through a proxy that has no access to it.
+- [x] Keep the GitHub repository rather than recreate it: the old commits
+      that stay reachable by hash hold only drafts and experiments.
+- [x] Make the repository public (2026-11-21).
+- [x] Make the links in `README.md` and `js/README.md` absolute, for the
+      PyPI and npm pages.
 
 ### Package contents
 
@@ -60,8 +53,7 @@ LICENSE.
 
 ### Publishing
 
-- [ ] Choose the first public version: the current `0.1.x`, or `0.2.0` to
-      mark the release.
+- [x] The first public version is 0.2.0.
 - [ ] Create a PyPI account with two-factor authentication, and a TestPyPI
       account.
 - [x] Set up trusted publishing: a GitHub Action publishes when a `v*` tag
@@ -82,10 +74,9 @@ LICENSE.
 
 - [ ] Publish `flowfields` on npm (the name was free on 2026-11-21). The
       package is ready: `npm pack` gives `flowfields.js`, the README and the
-      LICENSE. Make the links in `js/README.md` absolute first, since npm
-      shows it as the package page.
-- [ ] Publish `js/examples/` on GitHub Pages once the repository is public,
-      so the sketches run in the browser from a link.
+      LICENSE.
+- [ ] Publish `js/examples/` on GitHub Pages, so the sketches run in the
+      browser from a link.
 
 ## Library
 

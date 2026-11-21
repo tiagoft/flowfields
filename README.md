@@ -1,13 +1,13 @@
 # flowfields
 
-[![tests](../../actions/workflows/tests.yml/badge.svg)](../../actions/workflows/tests.yml)
-[![coverage](../../raw/badges/coverage.svg)](../../actions/workflows/tests.yml)
+[![tests](https://github.com/tiagoft/flowfields/actions/workflows/tests.yml/badge.svg)](https://github.com/tiagoft/flowfields/actions/workflows/tests.yml)
+[![coverage](https://raw.githubusercontent.com/tiagoft/flowfields/badges/coverage.svg)](https://github.com/tiagoft/flowfields/actions/workflows/tests.yml)
 
-![An image of the Eiffel tower drawn with colored lines that follow a tree of fields](demos/outputs/16-field_tree.png)
+![An image of the Eiffel tower drawn with colored lines that follow a tree of fields](https://raw.githubusercontent.com/tiagoft/flowfields/main/demos/outputs/16-field_tree.png)
 
 A generative-art toolkit built around composable **vector fields** and **scalar fields**.  Fields form trees (similar to syntax trees): leaf nodes are primitives and internal nodes are combinators.  It comes in Python and as a [p5.js](https://p5js.org) library.
 
-See the [demos](demos/README.md) for a small script and a figure for each feature.
+See the [demos](https://github.com/tiagoft/flowfields/blob/main/demos/README.md) for a small script and a figure for each feature.
 
 ## Installation
 
@@ -41,8 +41,8 @@ pip install git+https://github.com/tiagoft/flowfields.git
 <script src="https://cdn.jsdelivr.net/gh/tiagoft/flowfields@main/js/flowfields.js"></script>
 ```
 
-Build fields inside `setup()` or later. The [JS README](js/README.md) shows how
-the Python API maps to JS, and [`js/examples/`](js/examples/) has sketches.
+Build fields inside `setup()` or later. The [JS README](https://github.com/tiagoft/flowfields/blob/main/js/README.md) shows how
+the Python API maps to JS, and [`js/examples/`](https://github.com/tiagoft/flowfields/tree/main/js/examples) has sketches.
 
 ### Running the demos
 
@@ -140,14 +140,14 @@ Pieces made with flowfields for [Genuary 2026](https://genuary.art). Click an im
 
 | | | |
 | --- | --- | --- |
-| [![Genuary 03](artwork/genuary2026/images/genuary03.jpg)](artwork/genuary2026/genuary03.py) | [![Genuary 08](artwork/genuary2026/images/genuary08.jpg)](artwork/genuary2026/genuary08.py) | [![Genuary 12](artwork/genuary2026/images/genuary12.jpg)](artwork/genuary2026/genuary12.py) |
-| [![Genuary 16](artwork/genuary2026/images/genuary16.jpg)](artwork/genuary2026/genuary16.py) | [![Genuary 19](artwork/genuary2026/images/genuary19.jpg)](artwork/genuary2026/genuary19.py) | [![Genuary 25](artwork/genuary2026/images/genuary25.jpg)](artwork/genuary2026/genuary25.py) |
+| [![Genuary 03](https://raw.githubusercontent.com/tiagoft/flowfields/main/artwork/genuary2026/images/genuary03.jpg)](https://github.com/tiagoft/flowfields/blob/main/artwork/genuary2026/genuary03.py) | [![Genuary 08](https://raw.githubusercontent.com/tiagoft/flowfields/main/artwork/genuary2026/images/genuary08.jpg)](https://github.com/tiagoft/flowfields/blob/main/artwork/genuary2026/genuary08.py) | [![Genuary 12](https://raw.githubusercontent.com/tiagoft/flowfields/main/artwork/genuary2026/images/genuary12.jpg)](https://github.com/tiagoft/flowfields/blob/main/artwork/genuary2026/genuary12.py) |
+| [![Genuary 16](https://raw.githubusercontent.com/tiagoft/flowfields/main/artwork/genuary2026/images/genuary16.jpg)](https://github.com/tiagoft/flowfields/blob/main/artwork/genuary2026/genuary16.py) | [![Genuary 19](https://raw.githubusercontent.com/tiagoft/flowfields/main/artwork/genuary2026/images/genuary19.jpg)](https://github.com/tiagoft/flowfields/blob/main/artwork/genuary2026/genuary19.py) | [![Genuary 25](https://raw.githubusercontent.com/tiagoft/flowfields/main/artwork/genuary2026/images/genuary25.jpg)](https://github.com/tiagoft/flowfields/blob/main/artwork/genuary2026/genuary25.py) |
 
-All pieces are in [`artwork/genuary2026`](artwork/genuary2026).
+All pieces are in [`artwork/genuary2026`](https://github.com/tiagoft/flowfields/tree/main/artwork/genuary2026).
 
 ## License
 
 flowfields is free software, released under the
-[GNU Affero General Public License v3.0 or later](LICENSE). Images and other
+[GNU Affero General Public License v3.0 or later](https://github.com/tiagoft/flowfields/blob/main/LICENSE). Images and other
 works you make with it are yours; programs that use or modify the library,
 including sketches served on the web, must be shared under the same license.
