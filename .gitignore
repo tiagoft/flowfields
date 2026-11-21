@@ -19,3 +19,7 @@ wheels/
 # JS port
 js/node_modules/
 .claude/settings.local.json
+
+# Coverage reports
+.coverage
+coverage.json
