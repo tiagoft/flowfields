@@ -56,11 +56,17 @@ where = ["src/"]
 [dependency-groups]
 dev = [
     "matplotlib>=3.7",
-    "pycairo>=1.29.0",
     "pytest>=8",
     "pytest-cov>=5",
+]
+# Used only by artwork/; pycairo needs the cairo library from the system
+artwork = [
+    "pycairo>=1.29.0",
     "tqdm>=4.67.1",
 ]
+
+[tool.uv]
+default-groups = ["dev", "artwork"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

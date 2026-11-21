@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
       - name: Run pytest
-        run: uv run --locked --python ${{ matrix.python }} pytest -q
+        run: uv run --locked --no-group artwork --python ${{ matrix.python }} pytest -q
 
   python-lowest:
     # The lowest versions that pyproject.toml allows, on the lowest Python
@@ -30,8 +30,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
+      # A separate virtual environment, so uv.lock is neither used nor changed
+      - name: Install the lowest versions
+        run: |
+          uv venv --python 3.10 .venv-lowest
+          uv pip install --python .venv-lowest --resolution lowest-direct ".[plot]" "pytest>=8"
       - name: Run pytest
-        run: uv run --isolated --python 3.10 --resolution lowest-direct --with "pytest>=8" pytest -q
+        run: .venv-lowest/bin/python -m pytest -q
 
   js:
     name: JS port
@@ -60,9 +65,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
       - name: Measure coverage
-        run: uv run --locked pytest -q --cov --cov-report=term --cov-report=json
+        run: uv run --locked --no-group artwork pytest -q --cov --cov-report=term --cov-report=json
       - name: Make the badge
-        run: uv run --locked python tools/coverage_badge.py coverage.json "$RUNNER_TEMP/coverage.svg"
+        run: uv run --locked --no-group artwork python tools/coverage_badge.py coverage.json "$RUNNER_TEMP/coverage.svg"
       - name: Push it to the badges branch
         run: |
           git config user.name "github-actions[bot]"
