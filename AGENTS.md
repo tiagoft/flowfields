@@ -62,3 +62,18 @@ git config core.hooksPath .githooks
 git config branch.main.mergeOptions --no-ff
 git config pull.ff only
 ```
+
+## Releasing
+
+Pushing a tag `v` + the version in `pyproject.toml` runs
+`.github/workflows/publish.yml`, which tests, builds and publishes to TestPyPI
+and then PyPI:
+
+```sh
+git tag "v$(sed -n 's/^version = "\(.*\)"$/\1/p' pyproject.toml)"
+git push origin --tags
+```
+
+Tag `main` after the merge that should be released. Do not create or push
+tags unless the user asks: a pushed tag publishes, and PyPI never accepts the
+same version twice.
