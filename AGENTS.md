@@ -37,3 +37,22 @@ summary in the imperative or descriptive form, such as
 - `chore:` tooling, dependencies, config, repository housekeeping
 
 Keep each commit to one kind of change; split a change that mixes types.
+
+## Branches and versions
+
+Every change is made on its own branch, named after its type (such as
+`feat/noise-distribution` or `fix/fieldselect-weights`), and enters main
+with `git merge --no-ff`. Do not commit directly on main. The merge commit's
+message follows the same Conventional Commits form and summarizes the branch.
+
+Each commit on main bumps the patch number of the version (0.1.0 becomes
+0.1.1) through the hooks in `.githooks/`, which run `tools/bump_version.py`
+and update `pyproject.toml` and `uv.lock`. Do not change the version on a
+branch. After cloning, turn the hooks on and keep merges into main from
+fast-forwarding, since a fast-forward makes no commit and skips the bump:
+
+```sh
+git config core.hooksPath .githooks
+git config branch.main.mergeOptions --no-ff
+git config pull.ff only
+```
