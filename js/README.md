@@ -70,6 +70,8 @@ you can save it anywhere and open it in a browser:
   between rotations.
 - [`quantize.html`](https://github.com/tiagoft/flowfields/blob/main/js/examples/quantize.html): `quantizeVector` turns circles into
   polygons.
+- [`vortices.html`](https://github.com/tiagoft/flowfields/blob/main/js/examples/vortices.html): particles drift through four moving vortices,
+  drawn with additive blending so the paths they share glow white.
 
 In the [p5.js web editor](https://editor.p5js.org), put the two
 `<script src>` lines in `index.html` and the code of the last `<script>` in
