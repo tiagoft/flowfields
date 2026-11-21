@@ -18,3 +18,7 @@ wheels/
 
 # Old demos, kept only locally
 old_demos/
+
+# JS port
+js/node_modules/
+.claude/settings.local.json
