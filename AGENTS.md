@@ -1,7 +1,8 @@
 # tstudio
 
 Generative-art library of composable fields (`src/tstudio`), with demos in
-`demos/` and artworks in `artwork/`. Run Python with `uv run`.
+`demos/` and the Genuary 2026 pieces in `artwork/genuary2026/`. Run Python
+with `uv run`. Do not add other artworks to `artwork/`.
 
 ## The JS port
 
