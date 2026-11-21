@@ -26,6 +26,8 @@ class FieldSelect(FlowField):
 
     **Switching**: with probability ``change_id_prob`` at each call a new set of
     ``select_n`` fields is sampled (using weights evaluated at the current x).
+    The first set is sampled on the first call, with the weights at that
+    point.
 
     **Interpolation**: when ``lerp_len > 0`` a transition between the outgoing
     and incoming active field is linearly interpolated over ``lerp_len`` calls:
@@ -75,14 +77,11 @@ class FieldSelect(FlowField):
         self.lerp_count = 0
         self.rng = np.random.default_rng(rng)
 
-        self.last_idx = self.select_index().tolist()
-        fields = [self.list_of_fields[i] for i in self.last_idx]
-        weights = [self.weights[i] for i in self.last_idx] if self.weights is not None else None
-        self.current_field = FieldSum(
-            fields=fields,
-            weights=weights,
-        )
-        self.next_field = self.current_field
+        # The first fields are drawn on the first call, where the weights can
+        # be evaluated
+        self.last_idx = None
+        self.current_field = None
+        self.next_field = None
 
     def select_index(self, x: np.ndarray | None = None) -> np.ndarray:
         """
@@ -147,20 +146,20 @@ class FieldSelect(FlowField):
                 weights=weights,
             )
             self.lerp_count = 0
-
-        y_curr = self.current_field(x)
-        if self.current_field != self.next_field:
-            if self.lerp_count < self.lerp_len:
-                t = self.lerp_count / self.lerp_len
-                y_next = self.next_field(x)
-                y = (1 - t) * y_curr + t * y_next
-                self.lerp_count += 1
-            else:
+            if self.current_field is None:  # first call: no transition
                 self.current_field = self.next_field
-                self.lerp_count = 0
-                y = y_curr
+
+        if self.current_field is self.next_field:
+            y = self.current_field(x)
+        elif self.lerp_count < self.lerp_len:
+            t = self.lerp_count / self.lerp_len
+            y = (1 - t) * self.current_field(x) + t * self.next_field(x)
+            self.lerp_count += 1
         else:
-            y = y_curr
+            # The transition is over: the new field is used from this call on
+            self.current_field = self.next_field
+            self.lerp_count = 0
+            y = self.current_field(x)
 
         if self.normalize:
             y = normalize_vector(y)
