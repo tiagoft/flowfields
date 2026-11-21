@@ -25,24 +25,24 @@ LICENSE.
 
 ### Package contents
 
-- [ ] Delete `src/flowfields/main.py`, a placeholder that prints a greeting,
+- [x] Delete `src/flowfields/main.py`, a placeholder that prints a greeting,
       and the commented `[project.scripts]` in `pyproject.toml`.
-- [ ] Delete the empty `src/flowfields/color_fields/utils.py`.
-- [ ] `__version__` in `flowfields/__init__.py`, read with
+- [x] Delete the empty `src/flowfields/color_fields/utils.py`.
+- [x] `__version__` in `flowfields/__init__.py`, read with
       `importlib.metadata.version("flowfields")` so the version hook stays the
       only place that changes it.
-- [ ] Imports at the package level, so `import flowfields as ff` gives
+- [x] Imports at the package level, so `import flowfields as ff` gives
       `ff.RotationField`, `ff.GaussianField` and so on.
-- [ ] An empty `py.typed`, so type checkers use the annotations.
+- [x] An empty `py.typed`, so type checkers use the annotations.
 
 ### Metadata in `pyproject.toml`
 
-- [ ] `requires-python = ">=3.10"`: the code needs nothing newer.
-- [ ] `authors`.
-- [ ] `[project.urls]`: Homepage, Source, Issues and the demos.
-- [ ] `keywords`: generative art, flow field, vector field, creative coding,
+- [x] `requires-python = ">=3.10"`: the code needs nothing newer.
+- [x] `authors`.
+- [x] `[project.urls]`: Homepage, Source, Issues and the demos.
+- [x] `keywords`: generative art, flow field, vector field, creative coding,
       p5.js.
-- [ ] `classifiers`: development status, Python versions,
+- [x] `classifiers`: development status, Python versions,
       `Topic :: Artistic Software`, `Topic :: Multimedia :: Graphics`. No
       license classifier: `license = "AGPL-3.0-or-later"` replaces it.
 - [ ] Decide whether `scikit-learn` (only `MatrixColorField`) and
