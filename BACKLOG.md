@@ -46,8 +46,8 @@ LICENSE.
       `Topic :: Artistic Software`, `Topic :: Multimedia :: Graphics`. No
       license classifier: `license = "AGPL-3.0-or-later"` replaces it.
 - [x] `scikit-learn` is gone: `flowfields.utils.kmeans` replaces it.
-- [ ] Decide whether `matplotlib` (only `MatrixField.plot_figure`) becomes an
-      optional extra. Its import is already inside `plot_figure`.
+- [x] `matplotlib` is the optional extra `flowfields[plot]`, needed only by
+      `MatrixField.plot_figure`.
 
 ### Checks
 

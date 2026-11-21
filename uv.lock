@@ -93,29 +93,36 @@ wheels = [
 
 [[package]]
 name = "flowfields"
-version = "0.1.9"
+version = "0.1.10"
 source = { editable = "." }
 dependencies = [
-    { name = "matplotlib" },
     { name = "numpy" },
     { name = "pillow" },
 ]
 
+[package.optional-dependencies]
+plot = [
+    { name = "matplotlib" },
+]
+
 [package.dev-dependencies]
 dev = [
+    { name = "matplotlib" },
     { name = "pycairo" },
     { name = "tqdm" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "matplotlib", specifier = ">=3.7" },
+    { name = "matplotlib", marker = "extra == 'plot'", specifier = ">=3.7" },
     { name = "numpy", specifier = ">=1.24" },
     { name = "pillow", specifier = ">=10.0" },
 ]
+provides-extras = ["plot"]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "matplotlib", specifier = ">=3.7" },
     { name = "pycairo", specifier = ">=1.29.0" },
     { name = "tqdm", specifier = ">=4.67.1" },
 ]
