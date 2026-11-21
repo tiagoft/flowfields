@@ -15,6 +15,12 @@ Case kinds:
     "util": the function ``fn`` applied to ``args`` must return ``expected``.
     "stats": random fields.  The two languages draw different numbers, so
         only statistics over ``n`` draws at ``point`` are compared.
+    "kmeans": ``utils.kmeans`` on data whose clusters do not depend on the
+        random first centers.  The order of the clusters does, so the
+        centers are sorted and the labels renumbered by first appearance.
+    "color_probs": ``MatrixColorField.get_probs`` at each of ``points``, as
+        [r, g, b, probability] for each palette color, sorted by color, since
+        the palette order depends on the random first centers.
 
 Run with:  uv run python tools/export_fixtures.py
 """
@@ -24,6 +30,7 @@ from pathlib import Path
 
 import numpy as np
 
+import flowfields.color_fields as cf
 import flowfields.scalar_fields as sf
 import flowfields.utils as utils
 import flowfields.vector_fields as vf
@@ -31,11 +38,11 @@ import flowfields.vector_fields as vf
 OUTPUT = Path(__file__).parent.parent / "js" / "test" / "fixtures.json"
 
 # Fields that the JS port does not have yet.  Cases for them are not exported.
-NOT_PORTED = {"FieldSelect", "MatrixColorField"}
+NOT_PORTED = {"FieldSelect"}
 
 CLASSES = {
     name: getattr(module, name)
-    for module in (sf, vf)
+    for module in (sf, vf, cf)
     for name in module.__all__
 }
 
@@ -160,6 +167,53 @@ STATS_CASES = {
 }
 
 
+_KMEANS_RNG = np.random.default_rng(42)
+_REPEATED = np.array([[0.0, 0.0, 0.0]] * 5 + [[1.0, 0.0, 0.0]] * 7
+                     + [[0.0, 1.0, 0.5]] * 4 + [[0.2, 0.2, 0.9]] * 6)
+_BLOB_CENTERS = np.array([[0.0, 0.0], [10.0, 0.0], [0.0, 10.0], [10.0, 10.0]])
+_BLOBS = np.concatenate([c + 0.1 * _KMEANS_RNG.normal(size=(15, 2)) for c in _BLOB_CENTERS])
+
+# name: (data, n_clusters, seed)
+KMEANS_CASES = {
+    "one_cluster": (_KMEANS_RNG.uniform(size=(30, 3)), 1, 0),
+    "repeated_points": (_KMEANS_RNG.permutation(_REPEATED), 4, 1),
+    "separated_blobs": (_KMEANS_RNG.permutation(_BLOBS), 4, 2),
+}
+
+
+def canonical_clusters(centers, labels):
+    """Sorted centers, and labels numbered by order of first appearance"""
+    numbers = {}
+    renumbered = [numbers.setdefault(int(label), len(numbers)) for label in labels]
+    return {"centers": sorted(centers.tolist()), "labels": renumbered}
+
+
+# An 8 x 12 image of flat colors: red, green and blue thirds, with a yellow
+# strip over the last two rows of the left half (highest y)
+_IMAGE = np.zeros((8, 12, 3))
+_IMAGE[:, 0:4] = [0.9, 0.1, 0.1]
+_IMAGE[:, 4:8] = [0.1, 0.8, 0.2]
+_IMAGE[:, 8:12] = [0.1, 0.2, 0.9]
+_IMAGE[6:8, 0:6] = [0.95, 0.9, 0.1]
+IMAGE = {"array": _IMAGE.tolist()}
+
+COLOR_CASES = {
+    "color_small_window": field("MatrixColorField", min_corner=vec(-1.0, -1.0), max_corner=vec(1.0, 0.5),
+                                data=IMAGE, n_colors=4, random_state=3, kernel_size=0.25, temperature=0.2),
+    "color_window": field("MatrixColorField", min_corner=vec(-1.0, -1.0), max_corner=vec(1.0, 0.5),
+                          data=IMAGE, n_colors=4, kernel_size=0.5),
+    "color_window_cold": field("MatrixColorField", min_corner=vec(-1.0, -1.0), max_corner=vec(1.0, 0.5),
+                               data=IMAGE, n_colors=4, kernel_size=0.5, temperature=0.05),
+    "color_whole_image_hot": field("MatrixColorField", min_corner=vec(1.0, 0.5), max_corner=vec(-1.0, -1.0),
+                                   data=IMAGE, n_colors=4, kernel_size=1.0, temperature=10.0),
+}
+
+
+def color_probs(color_field, x):
+    probs = color_field.get_probs(x)
+    return sorted(c.tolist() + [float(p)] for c, p in zip(color_field.palette, probs))
+
+
 def stats(samples):
     samples = np.array(samples)
     norms = np.linalg.norm(samples, axis=1)
@@ -184,6 +238,17 @@ def main():
     for fn, args in UTIL_CASES:
         result = getattr(utils, fn)(*build(args))
         cases.append({"name": fn, "kind": "util", "fn": fn, "args": args, "expected": to_json(result)})
+
+    for name, (data, n_clusters, seed) in KMEANS_CASES.items():
+        centers, labels = utils.kmeans(data, n_clusters, rng=seed)
+        cases.append({"name": name, "kind": "kmeans", "data": data.tolist(), "n_clusters": n_clusters,
+                      "seed": seed, "expected": canonical_clusters(centers, labels)})
+
+    for name, spec in COLOR_CASES.items():
+        f = build(spec)
+        expected = [color_probs(f, np.array(p, dtype=float)) for p in POINTS]
+        cases.append({"name": name, "kind": "color_probs", "spec": spec, "points": POINTS,
+                      "expected": expected})
 
     point = [0.4, -0.3]
     for name, spec in STATS_CASES.items():

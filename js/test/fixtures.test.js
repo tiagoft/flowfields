@@ -49,6 +49,14 @@ function close_(actual, expected, where) {
   assert.ok(ok, `${where}: got ${actual}, expected ${expected}`);
 }
 
+/** Orders arrays of numbers lexicographically, like Python's sorted(). */
+function byColor(a, b) {
+  for (let i = 0; i < Math.min(a.length, b.length); i++) {
+    if (a[i] !== b[i]) return a[i] - b[i];
+  }
+  return a.length - b.length;
+}
+
 for (const c of cases) {
   if (c.kind === "scalar" || c.kind === "vector") {
     test(`${c.kind} ${c.name}`, () => {
@@ -68,6 +76,46 @@ for (const c of cases) {
       const before = JSON.stringify(plain(args));
       close_(plain(fn(...args)), c.expected, c.fn);
       assert.equal(JSON.stringify(plain(args)), before, "the arguments were changed");
+    });
+  } else if (c.kind === "kmeans") {
+    test(`kmeans ${c.name}`, () => {
+      const before = JSON.stringify(c.data);
+      const [centers, labels] = flowfields.kmeans(c.data, c.n_clusters, c.seed);
+      assert.equal(JSON.stringify(c.data), before, "the data was changed");
+      // Same canonical form as canonical_clusters in tools/export_fixtures.py
+      const numbers = new Map();
+      const renumbered = labels.map((l) => {
+        if (!numbers.has(l)) numbers.set(l, numbers.size);
+        return numbers.get(l);
+      });
+      assert.deepEqual(renumbered, c.expected.labels, "labels");
+      close_(centers.slice().sort(byColor), c.expected.centers, "centers");
+
+      // The same seed gives the same clusters. Compared as JSON because the
+      // library runs in jsdom's realm, whose arrays deepEqual rejects.
+      const again = flowfields.kmeans(c.data, c.n_clusters, c.seed);
+      assert.equal(JSON.stringify(again), JSON.stringify([centers, labels]), "same seed, different clusters");
+    });
+  } else if (c.kind === "color_probs") {
+    test(`color_probs ${c.name}`, () => {
+      const field = build(c.spec);
+      c.points.forEach((pt, i) => {
+        const x = new p5.Vector(pt[0], pt[1]);
+        const probs = field.getProbs(x);
+        const rows = field.palette.map((color, k) => [...color, probs[k]]).sort(byColor);
+        close_(rows, c.expected[i], `at (${pt})`);
+        assert.deepEqual([x.x, x.y], pt, `at (${pt}): the input point was changed`);
+      });
+
+      // Draws come from the palette, and the same seed gives the same draws
+      const x = new p5.Vector(0.1, -0.3);
+      const a = build({ ...c.spec, args: { ...c.spec.args, rng: 7 } });
+      const b = build({ ...c.spec, args: { ...c.spec.args, rng: 7 } });
+      for (let k = 0; k < 20; k++) {
+        const color = a.at(x);
+        assert.ok(a.palette.some((p) => JSON.stringify(p) === JSON.stringify(color)), `${color} is not in the palette`);
+        assert.deepEqual(color, b.at(x), "same seed, different draws");
+      }
     });
   } else if (c.kind === "stats") {
     test(`stats ${c.name}`, () => {
