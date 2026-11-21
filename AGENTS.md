@@ -53,8 +53,11 @@ message follows the same Conventional Commits form and summarizes the branch.
 
 Each commit on main bumps the patch number of the version (0.1.0 becomes
 0.1.1) through the hooks in `.githooks/`, which run `tools/bump_version.py`
-and update `pyproject.toml` and `uv.lock`. Do not change the version on a
-branch. After cloning, turn the hooks on and keep merges into main from
+and update `pyproject.toml`, `uv.lock`, `js/package.json` and
+`js/package-lock.json`. Do not change the version on a branch, except to set
+a new minor or major version (such as 0.3.0) when the user asks: a commit
+that changes the version by hand keeps it, with no bump on top. Change it in
+all four files. After cloning, turn the hooks on and keep merges into main from
 fast-forwarding, since a fast-forward makes no commit and skips the bump:
 
 ```sh
