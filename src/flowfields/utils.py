@@ -1,7 +1,54 @@
 """Helpers for opening images and for working with 2D vectors."""
 
+import difflib
+import inspect
+import warnings
+
 import numpy as np
 from PIL import Image
+
+
+class UnusedArgumentWarning(UserWarning):
+    """A field was given keyword arguments that it does not use
+
+    Fields accept and ignore unknown keyword arguments, so one field type can
+    replace another with a slightly different API.  This warning catches
+    typos such as ``normalise=False``.  To swap fields on purpose without it:
+
+        warnings.simplefilter("ignore", flowfields.UnusedArgumentWarning)
+    """
+
+
+def warn_unused_arguments(field: object, kwargs: dict) -> None:
+    """Warn that a field ignores the keyword arguments in kwargs
+
+    Fields call it from ``__init__`` with their ``**kwargs``.  The warning
+    names each argument and, when one is close to a parameter of the field,
+    suggests it.  It points to the line that created the field.
+
+    Args:
+        field (object): The field being created
+        kwargs (dict): The keyword arguments the field does not use
+    """
+    if not kwargs:
+        return
+    cls = type(field)
+    parameters = [
+        name for name in inspect.signature(cls.__init__).parameters
+        if name not in ("self", "kwargs")
+    ]
+    names = []
+    for name in kwargs:
+        close = difflib.get_close_matches(name, parameters, n=1)
+        hint = f" (did you mean '{close[0]}'?)" if close else ""
+        names.append(f"'{name}'{hint}")
+    plural = "s" if len(names) > 1 else ""
+    # stacklevel 3: this function, the field's __init__, the caller
+    warnings.warn(
+        f"{cls.__name__} ignores the argument{plural} {', '.join(names)}",
+        UnusedArgumentWarning,
+        stacklevel=3,
+    )
 
 
 def open_image(filename: str, mode: str = "RGB") -> np.ndarray:

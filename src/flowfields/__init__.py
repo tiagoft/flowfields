@@ -34,6 +34,7 @@ from flowfields.vector_fields import (
     NoiseField,
     RotationField,
 )
+from flowfields.utils import UnusedArgumentWarning
 
 try:
     __version__ = version("flowfields")
@@ -42,6 +43,7 @@ except PackageNotFoundError:  # running from a source tree that is not installed
 
 __all__ = [
     "__version__",
+    "UnusedArgumentWarning",
     # submodules
     "color_fields",
     "scalar_fields",

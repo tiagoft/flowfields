@@ -3,7 +3,7 @@
 import numpy as np
 
 from flowfields.scalar_fields import ScalarField
-from flowfields.utils import normalize_vector
+from flowfields.utils import normalize_vector, warn_unused_arguments
 from flowfields.vector_fields.base import FlowField
 
 
@@ -35,7 +35,9 @@ class FieldSum(FlowField):
         fields: list[FlowField],
         weights: None | list[float] | list[ScalarField] = None,
         normalize: bool = True,
+        **kwargs,
     ):
+        warn_unused_arguments(self, kwargs)
         self.list_of_fields = fields
         self.weights = weights
         self.normalize = normalize

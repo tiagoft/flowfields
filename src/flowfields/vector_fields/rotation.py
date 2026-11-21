@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from flowfields.utils import normalize_vector
+from flowfields.utils import normalize_vector, warn_unused_arguments
 from flowfields.vector_fields.base import FlowField
 
 
@@ -27,7 +27,7 @@ class RotationField(FlowField):
         center: Point the flow rotates around.
         direction: +1 for counter-clockwise, -1 for clockwise.
         normalize: Whether to L2-normalise the output vector.
-        **kwargs: Ignored.
+        **kwargs: Not used; each one gives an ``UnusedArgumentWarning``.
     """
 
     def __init__(
@@ -37,7 +37,7 @@ class RotationField(FlowField):
         normalize: bool = True,
         **kwargs,
     ):
-        super().__init__()
+        warn_unused_arguments(self, kwargs)
         self.center = center
         self.direction = direction
         self.normalize = normalize
