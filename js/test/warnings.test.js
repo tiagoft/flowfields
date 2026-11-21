@@ -39,6 +39,7 @@ const FIELDS = {
   NoiseField: () => ({ rng: 0 }),
   FieldSum: () => ({ fields: [new ff.RotationField({ center: [0, 0] })] }),
   FieldMax: () => ({ fields: [new ff.RotationField({ center: [0, 0] })] }),
+  FieldSelect: () => ({ fields: [new ff.RotationField({ center: [0, 0] })], rng: 0 }),
   ColorField: () => ({}),
   MatrixColorField: () => ({ minCorner: [0, 0], maxCorner: [1, 1], data: IMAGE, nColors: 2 }),
 };
