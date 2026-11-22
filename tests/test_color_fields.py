@@ -101,3 +101,71 @@ class TestMatrixColorField:
         a, b = two_colors(rng=4), two_colors(rng=4)
         for x in [p(0.9, 0.5), p(1.1, 0.2)] * 10:
             assert np.array_equal(a(x), b(x))
+
+
+class TestKmeansSample:
+    DATA = np.random.default_rng(6).uniform(size=(500, 3))
+
+    def test_labels_cover_all_points_and_are_nearest(self):
+        centers, labels = kmeans(self.DATA, 5, rng=0, sample_size=50)
+        assert labels.shape == (500,)
+        distances = np.linalg.norm(self.DATA[:, None, :] - centers[None, :, :], axis=2)
+        assert np.array_equal(labels, np.argmin(distances, axis=1))
+
+    def test_fraction_and_count_agree(self):
+        a = kmeans(self.DATA, 4, rng=1, sample_size=0.1)
+        b = kmeans(self.DATA, 4, rng=1, sample_size=50)
+        assert np.array_equal(a[0], b[0]) and np.array_equal(a[1], b[1])
+
+    def test_whole_sample_is_the_same_as_none(self):
+        a = kmeans(self.DATA, 4, rng=2)
+        for size in (500, 1.0):
+            b = kmeans(self.DATA, 4, rng=2, sample_size=size)
+            assert np.array_equal(a[0], b[0]) and np.array_equal(a[1], b[1])
+
+    def test_sample_finds_separated_blobs(self):
+        rng = np.random.default_rng(3)
+        means = np.array([[0, 0], [10, 0], [0, 10], [10, 10]], dtype=float)
+        data = np.concatenate([m + 0.1 * rng.normal(size=(500, 2)) for m in means])
+        centers, _ = kmeans(data, 4, rng=0, sample_size=200)
+        for m in means:
+            assert np.min(np.linalg.norm(centers - m, axis=1)) < 0.1
+
+    def test_too_large_warns_and_uses_all_points(self):
+        a = kmeans(self.DATA, 4, rng=2)
+        with pytest.warns(UserWarning, match="larger than the 500 points") as record:
+            b = kmeans(self.DATA, 4, rng=2, sample_size=501)
+        assert record[0].filename == __file__
+        assert np.array_equal(a[0], b[0]) and np.array_equal(a[1], b[1])
+
+    @pytest.mark.parametrize("size", [0, -3, 0.0, 1.5, -0.2])
+    def test_invalid_sample_size(self, size):
+        with pytest.raises(ValueError):
+            kmeans(self.DATA, 2, sample_size=size)
+
+    def test_sample_smaller_than_clusters(self):
+        with pytest.raises(ValueError, match="between 1 and 3"):
+            kmeans(self.DATA, 4, sample_size=3)
+
+
+class TestMatrixColorFieldSample:
+    BIG = np.random.default_rng(8).uniform(size=(120, 100, 3))
+
+    def test_small_image_with_the_default_gives_no_warning(self):
+        import warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            two_colors()
+
+    def test_too_large_sample_warns(self):
+        with pytest.warns(UserWarning, match="larger than the 800 points"):
+            two_colors(sample_size=801)
+
+    def test_sample_size_reaches_kmeans(self):
+        f = ff.MatrixColorField(p(0, 0), p(1, 1), self.BIG, n_colors=3, sample_size=500)
+        centers, _ = kmeans(self.BIG.reshape(-1, 3), 3, rng=0, sample_size=500)
+        assert np.array_equal(f.palette, centers)
+        assert f.sample_size == 500
+
+    def test_sampled_palette_still_finds_the_colors(self):
+        assert np.allclose(sorted(two_colors(sample_size=0.2).palette.tolist()), sorted([RED, BLUE]))
