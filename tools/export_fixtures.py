@@ -206,11 +206,16 @@ _REPEATED = np.array([[0.0, 0.0, 0.0]] * 5 + [[1.0, 0.0, 0.0]] * 7
 _BLOB_CENTERS = np.array([[0.0, 0.0], [10.0, 0.0], [0.0, 10.0], [10.0, 10.0]])
 _BLOBS = np.concatenate([c + 0.1 * _KMEANS_RNG.normal(size=(15, 2)) for c in _BLOB_CENTERS])
 
-# name: (data, n_clusters, seed)
+_MANY_REPEATED = np.repeat(np.unique(_REPEATED, axis=0), [30, 25, 40, 35], axis=0)
+
+# name: (data, n_clusters, seed, sample_size).  With a sample, the clusters
+# must not depend on which points are drawn either.
 KMEANS_CASES = {
-    "one_cluster": (_KMEANS_RNG.uniform(size=(30, 3)), 1, 0),
-    "repeated_points": (_KMEANS_RNG.permutation(_REPEATED), 4, 1),
-    "separated_blobs": (_KMEANS_RNG.permutation(_BLOBS), 4, 2),
+    "one_cluster": (_KMEANS_RNG.uniform(size=(30, 3)), 1, 0, None),
+    "repeated_points": (_KMEANS_RNG.permutation(_REPEATED), 4, 1, None),
+    "separated_blobs": (_KMEANS_RNG.permutation(_BLOBS), 4, 2, None),
+    "repeated_points_sample": (_KMEANS_RNG.permutation(_MANY_REPEATED), 4, 3, 60),
+    "repeated_points_fraction": (_KMEANS_RNG.permutation(_MANY_REPEATED), 4, 4, 0.5),
 }
 
 
@@ -245,6 +250,8 @@ COLOR_CASES = {
                                data=IMAGE, n_colors=4, kernel_size=0.5, temperature=0.05),
     "color_whole_image_hot": field("MatrixColorField", min_corner=vec(1.0, 0.5), max_corner=vec(-1.0, -1.0),
                                    data=IMAGE, n_colors=4, kernel_size=1.0, temperature=10.0),
+    "color_window_sample": field("MatrixColorField", min_corner=vec(-1.0, -1.0), max_corner=vec(1.0, 0.5),
+                                 data=IMAGE, n_colors=4, kernel_size=0.5, sample_size=0.75),
 }
 
 
@@ -278,10 +285,11 @@ def main():
         result = getattr(utils, fn)(*build(args))
         cases.append({"name": fn, "kind": "util", "fn": fn, "args": args, "expected": to_json(result)})
 
-    for name, (data, n_clusters, seed) in KMEANS_CASES.items():
-        centers, labels = utils.kmeans(data, n_clusters, rng=seed)
+    for name, (data, n_clusters, seed, sample_size) in KMEANS_CASES.items():
+        centers, labels = utils.kmeans(data, n_clusters, rng=seed, sample_size=sample_size)
         cases.append({"name": name, "kind": "kmeans", "data": data.tolist(), "n_clusters": n_clusters,
-                      "seed": seed, "expected": canonical_clusters(centers, labels)})
+                      "seed": seed, "sample_size": sample_size,
+                      "expected": canonical_clusters(centers, labels)})
 
     for name, spec in COLOR_CASES.items():
         f = build(spec)

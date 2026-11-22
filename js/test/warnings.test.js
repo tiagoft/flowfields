@@ -82,3 +82,27 @@ test("flowfields.warnings.unusedArguments = false silences the warning", () => {
     ff.warnings.unusedArguments = true;
   }
 });
+
+test("kmeans warns when sampleSize is larger than the data, and uses all the points", () => {
+  const data = [[0, 0], [0, 0.1], [5, 5], [5, 5.1]];
+  let got;
+  const sent = warnings(() => { got = ff.kmeans(data, 2, 0, 100, 1e-4, 5); });
+  assert.equal(sent.length, 1);
+  assert.match(String(sent[0]), /larger than the 4 points/);
+  assert.equal(JSON.stringify(got), JSON.stringify(ff.kmeans(data, 2, 0)));
+});
+
+test("MatrixColorField's default sampleSize gives no warning on a small image", () => {
+  assert.deepEqual(warnings(() => new ff.MatrixColorField(FIELDS.MatrixColorField())), []);
+  const sent = warnings(() => new ff.MatrixColorField({ ...FIELDS.MatrixColorField(), sampleSize: 7 }));
+  assert.equal(sent.length, 1);
+});
+
+test("choice without replacement and without p gives distinct values in range", () => {
+  const rng = new ff.Generator(3);
+  const out = rng.choice(1000000, { size: 5000, replace: false });
+  assert.equal(new Set(out).size, 5000);
+  assert.ok(out.every((i) => Number.isInteger(i) && i >= 0 && i < 1000000));
+  const all = new ff.Generator(4).choice(10, { size: 10, replace: false });
+  assert.deepEqual([...all].sort((a, b) => a - b), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+});

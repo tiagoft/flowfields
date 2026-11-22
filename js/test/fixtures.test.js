@@ -83,7 +83,7 @@ for (const c of cases) {
   } else if (c.kind === "kmeans") {
     test(`kmeans ${c.name}`, () => {
       const before = JSON.stringify(c.data);
-      const [centers, labels] = flowfields.kmeans(c.data, c.n_clusters, c.seed);
+      const [centers, labels] = flowfields.kmeans(c.data, c.n_clusters, c.seed, 100, 1e-4, c.sample_size);
       assert.equal(JSON.stringify(c.data), before, "the data was changed");
       // Same canonical form as canonical_clusters in tools/export_fixtures.py
       const numbers = new Map();
@@ -96,7 +96,7 @@ for (const c of cases) {
 
       // The same seed gives the same clusters. Compared as JSON because the
       // library runs in jsdom's realm, whose arrays deepEqual rejects.
-      const again = flowfields.kmeans(c.data, c.n_clusters, c.seed);
+      const again = flowfields.kmeans(c.data, c.n_clusters, c.seed, 100, 1e-4, c.sample_size);
       assert.equal(JSON.stringify(again), JSON.stringify([centers, labels]), "same seed, different clusters");
     });
   } else if (c.kind === "color_probs") {
