@@ -214,11 +214,17 @@ KMEANS_CASES = {
 }
 
 
+def by_color(row):
+    """Sort key for colors, rounded so that float noise from sums in a
+    different order cannot swap two colors with an equal component"""
+    return [round(v, 9) for v in row]
+
+
 def canonical_clusters(centers, labels):
     """Sorted centers, and labels numbered by order of first appearance"""
     numbers = {}
     renumbered = [numbers.setdefault(int(label), len(numbers)) for label in labels]
-    return {"centers": sorted(centers.tolist()), "labels": renumbered}
+    return {"centers": sorted(centers.tolist(), key=by_color), "labels": renumbered}
 
 
 # An 8 x 12 image of flat colors: red, green and blue thirds, with a yellow
@@ -244,7 +250,7 @@ COLOR_CASES = {
 
 def color_probs(color_field, x):
     probs = color_field.get_probs(x)
-    return sorted(c.tolist() + [float(p)] for c, p in zip(color_field.palette, probs))
+    return sorted((c.tolist() + [float(p)] for c, p in zip(color_field.palette, probs)), key=by_color)
 
 
 def stats(samples):

@@ -50,9 +50,12 @@ function close_(actual, expected, where) {
 }
 
 /** Orders arrays of numbers lexicographically, like Python's sorted(). */
+// Rounded like by_color in tools/export_fixtures.py, so that float noise
+// cannot swap two colors with an equal component
 function byColor(a, b) {
   for (let i = 0; i < Math.min(a.length, b.length); i++) {
-    if (a[i] !== b[i]) return a[i] - b[i];
+    const x = Math.round(a[i] * 1e9), y = Math.round(b[i] * 1e9);
+    if (x !== y) return x - y;
   }
   return a.length - b.length;
 }
