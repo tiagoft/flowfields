@@ -34,7 +34,15 @@ class MatrixColorField(ColorField):
             including colors that are absent from the window.
         rng: Random generator for the color draws, or a seed for one.
             ``None`` takes a fresh seed from the operating system.
+        sample_size: Number of pixels that k-means uses to find the palette:
+            an int is a number of pixels, a float in (0, 1] is a fraction of
+            them, and ``None`` uses them all.  Every pixel then takes its
+            nearest palette color.  A number larger than the image warns and
+            uses all the pixels, except for the default, which uses all the
+            pixels of a small image without a warning.
     """
+
+    DEFAULT_SAMPLE_SIZE = 10_000
 
     def __init__(
         self,
@@ -46,6 +54,7 @@ class MatrixColorField(ColorField):
         kernel_size: float = 0.05,
         temperature: float = 1.0,
         rng: np.random.Generator | int | None = None,
+        sample_size: int | float | None = DEFAULT_SAMPLE_SIZE,
         **kwargs,
     ):
         warn_unused_arguments(self, kwargs)
@@ -57,14 +66,18 @@ class MatrixColorField(ColorField):
         self.kernel_size = kernel_size
         self.temperature = temperature
         self.rng = np.random.default_rng(rng)
+        self.sample_size = sample_size
 
         # The palette: the n_colors centers of the image's pixels, and the
         # palette color of every pixel
         h, w, _ = self.data.shape
+        if sample_size == self.DEFAULT_SAMPLE_SIZE and h * w <= sample_size:
+            sample_size = None
         self.palette, labels = kmeans(
             self.data.reshape(-1, 3),
             self.n_colors,
             rng=self.random_state,
+            sample_size=sample_size,
         )
         labels = labels.reshape(h, w)
 

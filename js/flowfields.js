@@ -3,7 +3,7 @@
 // GENERATED from src/flowfields by the port-js skill (.claude/skills/port-js).
 // Do not edit by hand: change the Python code and run /port-js again.
 //
-// source-commit: 510afc6
+// source-commit: 44b0626
 //
 // Not ported yet:     (nothing)
 // Python-only:        utils.open_image (use imageToMatrix), MatrixField.plot_figure
@@ -109,6 +109,20 @@
      * Returns one integer when size is undefined, otherwise an array.
      */
     choice(n, { size, replace = true, p } = {}) {
+      if (!p && !replace && size !== undefined) {
+        // Uniform without replacement: a partial Fisher–Yates shuffle that
+        // only stores the swapped places, so it stays fast for large n
+        if (size > n) throw new Error(`cannot take ${size} samples from ${n} without replacement`);
+        const swapped = new Map();
+        const out = [];
+        for (let k = 0; k < size; k++) {
+          const j = k + Math.floor(this.random() * (n - k));
+          const atJ = swapped.has(j) ? swapped.get(j) : j;
+          swapped.set(j, swapped.has(k) ? swapped.get(k) : k);
+          out.push(atJ);
+        }
+        return out;
+      }
       const probs = p ? p.slice() : new Array(n).fill(1.0 / n);
       const drawOne = () => {
         const total = probs.reduce((a, b) => a + b, 0);
@@ -198,13 +212,47 @@
   /**
    * k-means++ initialization, then Lloyd's algorithm. data is an array of
    * points (arrays of numbers). Returns [centers, labels].
+   *
+   * sampleSize: the centers are found from a random sample of the points,
+   * then every point goes to its nearest center. A number in (0, 1) is a
+   * fraction of the points and an integer from 1 up is a number of points
+   * (so, unlike Python's 1.0, 1 means one point); null uses all of them. A
+   * number larger than the data warns and uses all the points.
    */
-  function kmeans(data, nClusters, rng = null, maxIter = 100, tol = 1e-4) {
+  function kmeans(data, nClusters, rng = null, maxIter = 100, tol = 1e-4, sampleSize = null) {
     rng = defaultRng(rng);
     const nPoints = data.length;
-    if (!(nClusters >= 1 && nClusters <= nPoints)) {
-      throw new Error(`n_clusters must be between 1 and ${nPoints}, got ${nClusters}`);
+    const nSample = _sampleCount(sampleSize, nPoints);
+    const fit = nSample < nPoints
+      ? rng.choice(nPoints, { size: nSample, replace: false }).map((i) => data[i])
+      : data;
+    if (!(nClusters >= 1 && nClusters <= nSample)) {
+      throw new Error(`n_clusters must be between 1 and ${nSample}, got ${nClusters}`);
     }
+    const [centers, labels] = _lloyd(fit, nClusters, rng, maxIter, tol);
+    return [centers, fit === data ? labels : _nearestCenter(data, centers)];
+  }
+
+  /** How many of nPoints a kmeans sampleSize stands for. */
+  function _sampleCount(sampleSize, nPoints) {
+    if (sampleSize === null || sampleSize === undefined) return nPoints;
+    if (typeof sampleSize !== "number" || !(sampleSize > 0)) {
+      throw new Error(`sample_size must be a positive number or null, got ${sampleSize}`);
+    }
+    if (sampleSize < 1) return Math.max(1, roundHalfEven(sampleSize * nPoints));
+    if (!Number.isInteger(sampleSize)) {
+      throw new Error(`sample_size must be a fraction below 1 or a whole number, got ${sampleSize}`);
+    }
+    if (sampleSize > nPoints) {
+      console.warn(`sample_size ${sampleSize} is larger than the ${nPoints} points, so all of them are used`);
+      return nPoints;
+    }
+    return sampleSize;
+  }
+
+  /** k-means++ initialization, then Lloyd's algorithm, as in kmeans. */
+  function _lloyd(data, nClusters, rng, maxIter, tol) {
+    const nPoints = data.length;
     const nDims = data[0].length;
 
     // k-means++ initialization
@@ -736,7 +784,7 @@
   class MatrixColorField extends ColorField {
     constructor({
       minCorner, maxCorner, data, nColors, randomState = 0, kernelSize = 0.05,
-      temperature = 1.0, rng,
+      temperature = 1.0, rng, sampleSize = MatrixColorField.DEFAULT_SAMPLE_SIZE,
       ...rest
     }) {
       super();
@@ -749,12 +797,15 @@
       this.kernelSize = kernelSize;
       this.temperature = temperature;
       this.rng = defaultRng(rng);
+      this.sampleSize = sampleSize;
 
       // The palette: the nColors centers of the image's pixels, and the
-      // palette color of every pixel
+      // palette color of every pixel. The default uses all the pixels of a
+      // small image without a warning.
       const h = data.length;
       const w = data[0].length;
-      const [palette, labels] = kmeans(data.flat(), nColors, this.randomState);
+      if (sampleSize === MatrixColorField.DEFAULT_SAMPLE_SIZE && h * w <= sampleSize) sampleSize = null;
+      const [palette, labels] = kmeans(data.flat(), nColors, this.randomState, 100, 1e-4, sampleSize);
       this.palette = palette;
 
       // One integral image (2D prefix sum) per palette color, so windowed
@@ -811,6 +862,7 @@
       return this.palette[sample].slice();
     }
   }
+  MatrixColorField.DEFAULT_SAMPLE_SIZE = 10000;
 
   // ---------------------------------------------------------------------------
   // p5 extras (no Python counterpart)

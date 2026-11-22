@@ -50,9 +50,12 @@ function close_(actual, expected, where) {
 }
 
 /** Orders arrays of numbers lexicographically, like Python's sorted(). */
+// Rounded like by_color in tools/export_fixtures.py, so that float noise
+// cannot swap two colors with an equal component
 function byColor(a, b) {
   for (let i = 0; i < Math.min(a.length, b.length); i++) {
-    if (a[i] !== b[i]) return a[i] - b[i];
+    const x = Math.round(a[i] * 1e9), y = Math.round(b[i] * 1e9);
+    if (x !== y) return x - y;
   }
   return a.length - b.length;
 }
@@ -80,7 +83,7 @@ for (const c of cases) {
   } else if (c.kind === "kmeans") {
     test(`kmeans ${c.name}`, () => {
       const before = JSON.stringify(c.data);
-      const [centers, labels] = flowfields.kmeans(c.data, c.n_clusters, c.seed);
+      const [centers, labels] = flowfields.kmeans(c.data, c.n_clusters, c.seed, 100, 1e-4, c.sample_size);
       assert.equal(JSON.stringify(c.data), before, "the data was changed");
       // Same canonical form as canonical_clusters in tools/export_fixtures.py
       const numbers = new Map();
@@ -93,7 +96,7 @@ for (const c of cases) {
 
       // The same seed gives the same clusters. Compared as JSON because the
       // library runs in jsdom's realm, whose arrays deepEqual rejects.
-      const again = flowfields.kmeans(c.data, c.n_clusters, c.seed);
+      const again = flowfields.kmeans(c.data, c.n_clusters, c.seed, 100, 1e-4, c.sample_size);
       assert.equal(JSON.stringify(again), JSON.stringify([centers, labels]), "same seed, different clusters");
     });
   } else if (c.kind === "color_probs") {

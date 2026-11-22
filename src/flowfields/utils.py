@@ -73,6 +73,7 @@ def kmeans(
     rng: np.random.Generator | int | None = None,
     max_iter: int = 100,
     tol: float = 1e-4,
+    sample_size: int | float | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Group points into n_clusters clusters with k-means
 
@@ -86,15 +87,25 @@ def kmeans(
     max_iter rounds.  A cluster that loses all its points keeps its previous
     center.
 
+    With ``sample_size``, the centers are found from a random sample of the
+    points, drawn without replacement, and then every point goes to its
+    nearest center.  This is much faster on large images and gives nearly
+    the same centers.
+
     Args:
         data (np.ndarray): Points with shape (n_points, n_dims), such as the
             pixels of an image reshaped to (H * W, 3)
-        n_clusters (int): Number of clusters, from 1 to n_points
+        n_clusters (int): Number of clusters, from 1 to the number of points
+            used to find the centers
         rng (np.random.Generator | int | None): Random generator for the
-            first centers, or a seed for one.  None takes a fresh seed from
-            the operating system.
+            sample and the first centers, or a seed for one.  None takes a
+            fresh seed from the operating system.
         max_iter (int): Maximum number of rounds
         tol (float): Relative tolerance on the moves of the centers
+        sample_size (int | float | None): Number of points that find the
+            centers: an int is a number of points, and a float in (0, 1] is
+            a fraction of them.  None uses all the points.  A number larger
+            than n_points warns and uses all the points.
 
     Returns:
         tuple[np.ndarray, np.ndarray]: The centers, with shape
@@ -104,9 +115,54 @@ def kmeans(
     rng = np.random.default_rng(rng)
     data = np.asarray(data, dtype=float)
     n_points = data.shape[0]
-    if not 1 <= n_clusters <= n_points:
+    n_sample = _sample_count(sample_size, n_points)
+    if n_sample < n_points:
+        fit = data[rng.choice(n_points, size=n_sample, replace=False)]
+    else:
+        fit = data
+    if not 1 <= n_clusters <= n_sample:
         raise ValueError(
-            f"n_clusters must be between 1 and {n_points}, got {n_clusters}")
+            f"n_clusters must be between 1 and {n_sample}, got {n_clusters}")
+
+    centers, labels = _lloyd(fit, n_clusters, rng, max_iter, tol)
+    if fit is not data:
+        labels = _nearest_center(data, centers)
+    return centers, labels
+
+
+def _sample_count(sample_size: int | float | None, n_points: int) -> int:
+    """How many of n_points a kmeans sample_size stands for"""
+    if sample_size is None:
+        return n_points
+    if isinstance(sample_size, (int, np.integer)) and not isinstance(sample_size, bool):
+        if sample_size < 1:
+            raise ValueError(f"sample_size must be at least 1, got {sample_size}")
+        if sample_size > n_points:
+            warnings.warn(
+                f"sample_size {sample_size} is larger than the {n_points} "
+                "points, so all of them are used",
+                stacklevel=3,
+            )
+            return n_points
+        return int(sample_size)
+    if isinstance(sample_size, (float, np.floating)):
+        if not 0 < sample_size <= 1:
+            raise ValueError(
+                f"a fractional sample_size must be in (0, 1], got {sample_size}")
+        return max(1, round(sample_size * n_points))
+    raise TypeError(
+        f"sample_size must be an int, a float or None, got {type(sample_size).__name__}")
+
+
+def _lloyd(
+    data: np.ndarray,
+    n_clusters: int,
+    rng: np.random.Generator,
+    max_iter: int,
+    tol: float,
+) -> tuple[np.ndarray, np.ndarray]:
+    """k-means++ initialization, then Lloyd's algorithm, as in kmeans"""
+    n_points = data.shape[0]
 
     # k-means++ initialization
     centers = np.empty((n_clusters, data.shape[1]))
