@@ -1,6 +1,6 @@
 {
   "name": "flowfields",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "description": "Composable flow fields for generative art, for p5.js",
   "license": "AGPL-3.0-or-later",
   "author": "Tiago Tavares (https://tiagoft.github.io)",
